@@ -1,13 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const path = require('path');
 
 const app = express();
 app.use(express.json());
-
-// FIX 1: Look in the root folder instead of a 'public' folder
-app.use(express.static(__dirname));
+// Looks directly in the root directory for your index.html
+app.use(express.static(__dirname)); 
 
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rowankost_db_user:nMUEnmKUXTq7dmYg@artist-directory.muafcbh.mongodb.net/?appName=artist-directory';
