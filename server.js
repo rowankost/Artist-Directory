@@ -127,12 +127,18 @@ app.delete('/api/artists/:name', async (req, res) => {
 // --- Dedicated endpoint for Goon Corner ---
 app.get('/api/goon-corner', async (req, res) => {
   try {
+    // Fetch every artist from your database
     const artists = await Artist.find({});
+    
+    if (!artists || artists.length === 0) {
+      return res.json([]);
+    }
 
-    const goonCornerImages = await Promise.all(
+    // Fetch images for all artists simultaneously
+    const results = await Promise.all(
       artists.map(async (artist) => {
-        const formattedTag = artist.name.toLowerCase().trim().replace(/\s+/g, '_');
-        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent('artist:' + formattedTag + ' order:random')}&limit=1`;
+        const cleanQuery = artist.name.toLowerCase().trim();
+        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(cleanQuery + ' order:random')}&limit=4`;
         
         try {
           const response = await fetch(danbooruUrl, {
@@ -143,28 +149,50 @@ app.get('/api/goon-corner', async (req, res) => {
           if (response.ok) {
             const posts = await response.json();
             if (Array.isArray(posts) && posts.length > 0) {
-              let p = posts[0];
-              let rawUrl = p.file_url || p.large_file_url || p.preview_file_url;
-              if (rawUrl) {
+              const samples = posts.map(p => {
+                let rawUrl = p.file_url || p.large_file_url || p.preview_file_url;
+                if (!rawUrl) return null;
                 if (rawUrl.includes('cdn.donmai.us')) {
-                  rawUrl = rawUrl.replace(/\/180x180\/|\/sample\//g, '/');
+                  return rawUrl.replace(/\/180x180\/|\/sample\//g, '/');
                 }
+                return rawUrl;
+              }).filter(Boolean);
+
+              if (samples.length > 0) {
                 return {
                   artistName: artist.name,
-                  imageUrl: rawUrl,
-                  postId: p.id
+                  imageUrls: samples,
+                  postIds: posts.map(p => p.id)
                 };
               }
             }
           }
         } catch (fetchErr) {
-          console.error(`Failed to fetch random image for ${artist.name}:`, fetchErr);
+          console.error(`Failed to fetch images for ${artist.name}:`, fetchErr);
         }
         return null;
       })
     );
 
-    res.json(goonCornerImages.filter(item => item !== null));
+    // Filter out nulls
+    const validResults = results.filter(item => item !== null);
+
+    // Flatten all individual image links across every artist into one pool
+    let allImagePool = [];
+    validResults.forEach(artistResult => {
+      artistResult.imageUrls.forEach(url => {
+        allImagePool.push({
+          artistName: artistResult.artistName,
+          imageUrl: url
+        });
+      });
+    });
+
+    // Shuffle the entire pool and take exactly 50 images total
+    const shuffledImages = allImagePool.sort(() => 0.5 - Math.random());
+    const finalSelection = shuffledImages.slice(0, 50);
+
+    res.json(finalSelection);
   } catch (err) {
     console.error('Error fetching goon corner images:', err);
     res.status(500).json({ error: err.message });
