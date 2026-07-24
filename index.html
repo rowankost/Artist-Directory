@@ -365,45 +365,288 @@
       flex-wrap: wrap;
       gap: 6px;
     }
+        /* --- NEW FEATURES ROUTING LAYOUTS --- */
+    
+    /* 18+ Gateway & Main Menu Screen Background overlays */
+    .portal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .portal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .portal-box.wide {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .portal-box h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+
+    .portal-box h2 {
+      color: #cf6679;
+      margin-bottom: 15px;
+    }
+
+    .site-desc {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .portal-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .gate-btn {
+      padding: 12px 30px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      border: none;
+    }
+
+    .gate-btn.accept {
+      background: var(--normal-badge);
+      color: #000;
+    }
+
+    .gate-btn.refuse {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .gate-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Selection Grid Menu Options */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .menu-card {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      background: rgba(187, 134, 252, 0.05);
+    }
+
+    /* Horizontal Category Navigation Tabs Bar */
+    .top-nav-tabs {
+      height: 60px;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      width: 100%;
+    }
+
+    .nav-logo {
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .nav-logo:hover {
+      color: var(--accent);
+    }
+
+    .nav-tabs-container {
+      display: flex;
+      gap: 5px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0 20px;
+      height: 100%;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-color);
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Style Badges for the new groups */
+    .badge.loli {
+      background: rgba(187, 134, 252, 0.15);
+      color: #ffb74d;
+    }
+    .badge.shota) {
+      background: rgba(3, 218, 198, 0.15);
+      color: #64b5f6;
+    }
   </style>
 </head>
 <body>
+<body>
+  <!-- STEP 1: Age verification prompt -->
+  <div id="gateScreen" class="portal-overlay">
+    <div class="portal-box">
+      <h2>⚠️ Content Verification ⚠️</h2>
+      <p style="margin-top:10px; color:var(--text-muted);">This directory contains explicit illustrations and adult themes. You must be 18 years of age or older to browse this index.</p>
+      <div class="portal-buttons">
+        <button class="gate-btn accept" onclick="verifyAge(true)">I am 18 or older</button>
+        <button class="gate-btn refuse" onclick="verifyAge(false)">Leave Site</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Sidebar -->
-  <aside>
-    <div class="sidebar-header">
-      <span>Artists</span>
+  <!-- STEP 2: Main Application Menu -->
+  <div id="mainMenuScreen" class="portal-overlay" style="display: none;">
+    <div class="portal-box wide">
+      <h1>Artist Directory</h1>
+      <p class="site-desc">Welcome to the catalog index. Sort and map artist profile networks, tags, and production content tracking layouts across diverse specific illustration groups.</p>
+      
+      <h3 style="font-size:1.1rem; border-bottom:1px solid var(--border-color); padding-bottom:10px;">Select Category Index:</h3>
+      <div class="menu-grid">
+        <button class="menu-card" onclick="enterDirectory('all')">📚 All Artists</button>
+        <button class="menu-card" onclick="enterDirectory('normal')">✨ Normal</button>
+        <button class="menu-card" onclick="enterDirectory('furry')">🐾 Furry</button>
+        <button class="menu-card" onclick="enterDirectory('loli')">🌸 Loli</button>
+        <button class="menu-card" onclick="enterDirectory('shota')">⚡ Shota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Your Actual Interactive Grid Layout (Hidden until unlocked) -->
+  <div id="appInterface" style="display: none; width: 100%; min-height: 100vh; flex-direction: column;">
+    
+    <!-- Top Tabs Header Nav bar -->
+    <nav class="top-nav-tabs">
+      <div class="nav-logo" onclick="returnToMainMenu()">🏠 Main Menu</div>
+      <div class="nav-tabs-container">
+        <button class="nav-tab active" data-genre="all" onclick="switchGenreTab('all', this)">All</button>
+        <button class="nav-tab" data-genre="normal" onclick="switchGenreTab('normal', this)">Normal</button>
+        <button class="nav-tab" data-genre="furry" onclick="switchGenreTab('furry', this)">Furry</button>
+        <button class="nav-tab" data-genre="loli" onclick="switchGenreTab('loli', this)">Loli</button>
+        <button class="nav-tab" data-genre="shota" onclick="switchGenreTab('shota', this)">Shota</button>
+      </div>
       <button class="admin-btn" onclick="openAdminModal()">Admin</button>
-    </div>
-    <div class="genre-filter">
-      <button class="genre-btn active" onclick="filterGenre('all', this)">All</button>
-      <button class="genre-btn" onclick="filterGenre('normal', this)">Normal</button>
-      <button class="genre-btn" onclick="filterGenre('furry', this)">Furry</button>
-    </div>
-    <div class="sidebar-tags-container" id="sidebarTags">
-      <!-- Populated dynamically -->
-    </div>
-  </aside>
+    </nav>
 
-  <!-- Main View -->
-  <main>
-    <div class="top-bar">
-      <input type="text" id="searchInput" class="search-bar" placeholder="Search artists or tags..." oninput="render()">
-      <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
-    </div>
-    <div class="artist-grid" id="artistGrid">
-      <!-- Populated dynamically -->
-    </div>
-  </main>
+    <!-- Content Workspace -->
+    <div style="display: flex; flex: 1;">
+      <!-- Sidebar Tags Filter -->
+      <aside>
+        <div class="sidebar-header" style="font-size:1.1rem; border-bottom: 1px solid var(--border-color);">
+          <span>Filter Tags</span>
+        </div>
+        <div class="sidebar-tags-container" id="sidebarTags">
+          <!-- Populated dynamically by script -->
+        </div>
+      </aside>
 
-  <!-- Detail Modal -->
+      <!-- Main Directory View -->
+      <main>
+        <div class="top-bar">
+          <input type="text" id="searchInput" class="search-bar" placeholder="Search artists or tags..." oninput="render()">
+          <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
+        </div>
+        <div class="artist-grid" id="artistGrid">
+          <!-- Populated dynamically by script -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Detail Popout Modal -->
   <div class="modal-backdrop" id="detailModalBackdrop" onclick="closeModalOnBackdrop(event)">
     <div class="modal" id="detailModal">
       <!-- Populated dynamically -->
     </div>
   </div>
-
   <script>
+    // ⬇️ PASTE THE NEW FUNCTIONS DIRECTLY HERE ⬇️
+    function verifyAge(adult) {
+      if (adult) {
+        document.getElementById('gateScreen').style.display = 'none';
+        document.getElementById('mainMenuScreen').style.display = 'flex';
+      } else {
+        window.location.href = "https://google.com";
+      }
+    }
+
+    function enterDirectory(genreSelection) {
+      document.getElementById('mainMenuScreen').style.display = 'none';
+      document.getElementById('appInterface').style.display = 'flex';
+      
+      const tabMatch = document.querySelector(`.nav-tab[data-genre="${genreSelection}"]`);
+      if (tabMatch) {
+        switchGenreTab(genreSelection, tabMatch);
+      } else {
+        render();
+      }
+    }
+
+    function returnToMainMenu() {
+      document.getElementById('appInterface').style.display = 'none';
+      document.getElementById('mainMenuScreen').style.display = 'flex';
+    }
+
+    function switchGenreTab(selectedGroup, buttonRef) {
+      currentGenre = selectedGroup;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      buttonRef.classList.add('active');
+      render();
+    }
     const ADMIN_PASS = "admin";
 
     const ICONS = {
