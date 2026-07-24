@@ -459,7 +459,7 @@
       return defaultArtists;
     }
 
-    // Fetches artwork automatically via Rule34 API using the corsproxy.io client-side wrapper architecture
+    // Fetches artwork automatically via Rule34 API using a free open proxy
     async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
       let samples = [];
       let allTagsSet = new Set();
@@ -469,29 +469,32 @@
 
       try {
         const targetUrl = `https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags=${encodeURIComponent(cleanTag)}&limit=4`;
-        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
         const res = await fetch(proxyUrl);
         
         if (res.ok) {
-          const posts = await res.json();
-          if (Array.isArray(posts) && posts.length > 0) {
-            samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
-            posts.forEach(p => {
-              let tagString = p.tags;
-              if (typeof tagString === 'string') {
-                tagString.split(' ').forEach(t => {
-                  if (t) {
-                    allTagsSet.add(t);
-                    if (['furry', 'anthro', 'scalie', 'feral'].includes(t)) furryScore++;
-                  }
-                });
-              }
-            });
+          const data = await res.json();
+          if (data && data.contents) {
+            const posts = JSON.parse(data.contents);
+            if (Array.isArray(posts) && posts.length > 0) {
+              samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
+              posts.forEach(p => {
+                let tagString = p.tags;
+                if (typeof tagString === 'string') {
+                  tagString.split(' ').forEach(t => {
+                    if (t) {
+                      allTagsSet.add(t);
+                      if (['furry', 'anthro', 'scalie', 'feral'].includes(t)) furryScore++;
+                    }
+                  });
+                }
+              });
+            }
           }
         }
       } catch (e) {
-        console.warn("CORS proxy fetch warning:", e);
+        console.warn("Proxy fetch warning:", e);
       }
 
       const allTagsArray = Array.from(allTagsSet);
@@ -700,7 +703,7 @@
       const status = document.getElementById('adminStatus');
 
       if (!name) return;
-      status.innerText = "Querying via CORS proxy layer...";
+      status.innerText = "Querying via proxy layer...";
 
       const data = await fetchArtistData(name, twitter, featured);
       let db = getDb();
