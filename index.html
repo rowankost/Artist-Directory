@@ -533,6 +533,76 @@
       background: rgba(3, 218, 198, 0.15);
       color: #64b5f6;
     }
+    /* --- ARTIST DIRECTORY DESIGN SPICE UP --- */
+
+/* Modern Fluid Grid Layout */
+.artist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  padding: 25px;
+}
+
+/* Glassmorphic Cyberpunk Cards */
+.card {
+  background: rgba(30, 30, 30, 0.65) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  padding: 18px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease !important;
+}
+
+/* Interactive Hover Lift & Glow Effects */
+.card:hover {
+  transform: translateY(-6px) !important;
+  background: rgba(35, 35, 35, 0.8) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 10px 25px rgba(187, 134, 252, 0.2) !important;
+}
+
+/* Zoom effect on Artist Avatar Image */
+.card-avatar {
+  border-radius: 8px !important;
+  height: 220px !important;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .card-avatar {
+  transform: scale(1.02);
+}
+
+/* Styled Link Button Pills */
+.links-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.links-row a {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem !important;
+  font-weight: 500;
+  color: var(--text-color) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Individual Platform Brand Colors on Hover */
+.links-row a:hover {
+  background: rgba(187, 134, 252, 0.15) !important;
+  border-color: var(--accent) !important;
+  transform: scale(1.05);
+}
   </style>
 </head>
 <body>
