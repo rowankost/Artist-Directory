@@ -325,13 +325,31 @@
       gap: 10px;
     }
 
+    /* Image Wrapper with Hover Zoom / Magnifier Effect */
+    .img-zoom-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-color);
+    }
+
     .modal-sample-img {
       width: 100%;
-      height: auto;
-      max-height: 300px;
-      object-fit: contain;
+      height: 100%;
+      object-fit: cover;
       border-radius: 6px;
-      background: var(--bg-color);
+      transition: transform 0.3s ease;
+      cursor: zoom-in;
+    }
+
+    .img-zoom-container:hover .modal-sample-img {
+      transform: scale(1.8); /* Magnifies the image up to 1.8x on hover */
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 10;
+      position: relative;
     }
 
     .modal-tags-list {
@@ -436,11 +454,9 @@
           const posts = await res.json();
           if (Array.isArray(posts) && posts.length > 0) {
             samples = posts.map(p => {
-              // Grab whatever URL is available, prioritizing highest quality first
               let rawUrl = p.file_url || p.large_file_url || p.preview_file_url;
               if (!rawUrl) return null;
 
-              // Bypass unauthenticated preview limitations by stripping down the CDN thumbnail sizing paths
               if (rawUrl.includes('cdn.donmai.us')) {
                 return rawUrl.replace(/\/180x180\/|\/sample\//g, '/');
               }
@@ -603,7 +619,11 @@
       let samplesHtml = '';
       if (artist.samples && artist.samples.length > 0) {
         const resolvedSamples = await Promise.all(artist.samples.map(url => getBlobImageUrl(url)));
-        samplesHtml = resolvedSamples.map(sUrl => `<img class="modal-sample-img" referrerpolicy="no-referrer" src="${sUrl}" alt="sample">`).join('');
+        samplesHtml = resolvedSamples.map(sUrl => `
+          <div class="img-zoom-container">
+            <img class="modal-sample-img" referrerpolicy="no-referrer" src="${sUrl}" alt="sample">
+          </div>
+        `).join('');
       } else {
         samplesHtml = `<p style="color:var(--text-muted);">No samples available.</p>`;
       }
@@ -617,7 +637,7 @@
         <div class="links-row">
           ${buildLinksHtml(artist)}
         </div>
-        <h3>Samples</h3>
+        <h3>Samples (Hover to Zoom)</h3>
         <div class="modal-samples">
           ${samplesHtml}
         </div>
