@@ -1038,7 +1038,7 @@
         grid.innerHTML = accumulatedImages.map(item => `
           <div class="goon-card">
             <div class="goon-img-container img-zoom-container">
-              <img class="goon-img modal-sample-img" referrerpolicy="no-referrer" src="${item.imageUrl || item.url}" alt="${item.artistName}" onerror="this.style.display='none'">
+              <img class="goon-img modal-sample-img" referrerpolicy="no-referrer" src="${item.imageUrl || item.url}" alt="${item.artistName}">
             </div>
             <div class="goon-footer">🎨 ${item.artistName}</div>
           </div>
