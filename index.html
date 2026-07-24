@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artist Directory</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --text-muted: #aaa;
+      --accent: #bb86fc;
+      --accent-hover: #3700b3;
+      --border-color: #333;
+      --normal-badge: #03dac6;
+      --furry-badge: #cf6679;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    aside {
+      width: 280px;
+      background-color: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .admin-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .genre-filter {
+      display: flex;
+      padding: 10px 20px;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .genre-btn {
+      flex: 1;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .genre-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+
+    .sidebar-tags-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 20px;
+    }
+
+    .sidebar-tag-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-tag-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-color);
+    }
+
+    .sidebar-tag-item.active {
+      background: rgba(187, 134, 252, 0.15);
+      color: var(--accent);
+    }
+
+    /* Main Content */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .search-bar {
+      width: 400px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 15px;
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .stats-text {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .artist-grid {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+
+    .card-avatar {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--bg-color);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      color: var(--text-color);
+    }
+
+    .badge {
+      align-self: flex-start;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .badge.normal {
+      background: rgba(3, 218, 198, 0.15);
+      color: var(--normal-badge);
+    }
+
+    .badge.furry {
+      background: rgba(207, 102, 121, 0.15);
+      color: var(--furry-badge);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .tag.more-count {
+      color: var(--accent);
+      background: rgba(187, 134, 252, 0.1);
+    }
+
+    .links-row {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .links-row a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .links-row a:hover {
+      color: var(--accent);
+    }
+
+    .favicon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 650px;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: var(--text-color);
+    }
+
+    .modal-samples {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      overflow: visible; /* Allows zoomed elements to break out cleanly */
+    }
+
+    /* True Floating Hover Zoom */
+    .img-zoom-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      border-radius: 6px;
+      background: var(--bg-color);
+    }
+
+    .modal-sample-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+      cursor: zoom-in;
+    }
+
+    /* When hovered, it scales up smoothly out of its container bounds with a high layer index and shadow */
+    .img-zoom-container:hover .modal-sample-img {
+      transform: scale(1.7);
+      object-fit: contain;
+      background: rgba(18, 18, 18, 0.95);
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      width: calc(100% + 40px);
+      height: calc(100% + 40px);
+      z-index: 999;
+      border-radius: 8px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-header">
+      <span>Artists</span>
+      <button class="admin-btn" onclick="openAdminModal()">Admin</button>
+    </div>
+    <div class="genre-filter">
+      <button class="genre-btn active" onclick="filterGenre('all', this)">All</button>
+      <button class="genre-btn" onclick="filterGenre('normal', this)">Normal</button>
+      <button class="genre-btn" onclick="filterGenre('furry', this)">Furry</button>
+    </div>
+    <div class="sidebar-tags-container" id="sidebarTags">
+      <!-- Populated dynamically -->
+    </div>
+  </aside>
+
+  <!-- Main View -->
+  <main>
+    <div class="top-bar">
+      <input type="text" id="searchInput" class="search-bar" placeholder="Search artists or tags..." oninput="render()">
+      <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
+    </div>
+    <div class="artist-grid" id="artistGrid">
+      <!-- Populated dynamically -->
+    </div>
+  </main>
+
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detailModalBackdrop" onclick="closeModalOnBackdrop(event)">
+    <div class="modal" id="detailModal">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASS = "admin";
+
+    const ICONS = {
+      twitter: "https://x.com/favicon.ico",
+      rule34: "https://rule34.xxx/favicon.ico",
+      e621: "https://e621.net/favicon.ico"
+    };
+
+    const defaultArtists = [
+      {
+        name: "Brikot",
+        twitterHandle: "brikot_art",
+        genre: "normal",
+        featuredTags: ["tits", "thighs", "creampie"],
+        tags: ["tits", "thighs", "creampie", "sweat", "stockings", "female", "solo", "uncensored", "high_res", "smiling"],
+        samples: []
+      }
+    ];
+
+    let currentGenre = 'all';
+    let selectedSidebarTag = '';
+    let editingOriginalName = null;
+
+    function getDb() {
+      const stored = localStorage.getItem('artist_db');
+      if (stored) return JSON.parse(stored);
+      localStorage.setItem('artist_db', JSON.stringify(defaultArtists));
+      return defaultArtists;
+    }
+
+    async function getBlobImageUrl(url) {
+      if (!url) return '';
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) return url;
+        const blob = await res.blob();
+        return URL.createObjectURL(blob);
+      } catch (e) {
+        return url;
+      }
+    }
+
+    async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
+      let samples = [];
+      let allTagsSet = new Set();
+      let furryScore = 0;
+
+      const cleanTag = artistName.toLowerCase().trim();
+
+      try {
+        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(cleanTag)}&limit=4`;
+        const res = await fetch(danbooruUrl);
+        
+        if (res.ok) {
+          const posts = await res.json();
+          if (Array.isArray(posts) && posts.length > 0) {
+            samples = posts.map(p => {
+              let rawUrl = p.file_url || p.large_file_url || p.preview_file_url;
+              if (!rawUrl) return null;
+
+              if (rawUrl.includes('cdn.donmai.us')) {
+                return rawUrl.replace(/\/180x180\/|\/sample\//g, '/');
+              }
+
+              return rawUrl;
+            }).filter(Boolean);
+
+            posts.forEach(p => {
+              if (p.tag_string) {
+                p.tag_string.split(' ').forEach(t => {
+                  allTagsSet.add(t);
+                  if (['furry', 'anthro', 'scalie', 'feral'].includes(t)) furryScore++;
+                });
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Danbooru fetch warning:", e);
+      }
+
+      const allTagsArray = Array.from(allTagsSet);
+      let featured = manualFeaturedTags
+        ? manualFeaturedTags.split(",").map(t => t.trim().toLowerCase()).filter(Boolean)
+        : allTagsArray.slice(0, 3);
+
+      return {
+        name: artistName,
+        twitterHandle: (twitterHandle || '').replace('@', '').trim(),
+        genre: furryScore >= 1 ? "furry" : "normal",
+        featuredTags: featured,
+        tags: allTagsArray.length > 0 ? allTagsArray : featured,
+        samples: samples
+      };
+    }
+
+    function buildLinksHtml(artist) {
+      const twitterHandle = artist.twitterHandle;
+      const twitterUrl = twitterHandle 
+        ? `https://x.com/${twitterHandle}`
+        : `https://x.com/search?q=${encodeURIComponent(artist.name)}`;
+
+      const r34Url = `https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(artist.name.toLowerCase())}`;
+      const e621Url = `https://e621.net/posts?tags=${encodeURIComponent(artist.name.toLowerCase())}`;
+
+      const twitterBtn = `<a href="${twitterUrl}" target="_blank" onclick="event.stopPropagation()"><img src="${ICONS.twitter}" class="favicon" onerror="this.style.display='none'"> Twitter</a>`;
+      const r34Btn = `<a href="${r34Url}" target="_blank" onclick="event.stopPropagation()"><img src="${ICONS.rule34}" class="favicon" onerror="this.style.display='none'"> Rule34</a>`;
+      const e621Btn = `<a href="${e621Url}" target="_blank" onclick="event.stopPropagation()"><img src="${ICONS.e621}" class="favicon" onerror="this.style.display='none'"> e621</a>`;
+
+      if (artist.genre === 'furry') {
+        return `${twitterBtn}${e621Btn}${r34Btn}`;
+      } else {
+        return `${twitterBtn}${r34Btn}${e621Btn}`;
+      }
+    }
+
+    function getAvatarUrl(artist) {
+      if (artist.twitterHandle) {
+        return `https://unavatar.io/x/${artist.twitterHandle}`;
+      }
+      if (artist.samples && artist.samples.length > 0) {
+        return artist.samples[0];
+      }
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+    }
+
+    function renderSidebarTags(db) {
+      const tagCounts = {};
+      db.forEach(a => {
+        (a.tags || []).forEach(f => {
+          tagCounts[f] = (tagCounts[f] || 0) + 1;
+        });
+      });
+
+      const container = document.getElementById('sidebarTags');
+      container.innerHTML = '';
+
+      const clearDiv = document.createElement('div');
+      clearDiv.className = `sidebar-tag-item ${selectedSidebarTag === '' ? 'active' : ''}`;
+      clearDiv.id = 'clearTagBtn';
+      clearDiv.onclick = () => selectTagFilter('');
+      clearDiv.innerHTML = `<span>All Tags</span><span>${db.length}</span>`;
+      container.appendChild(clearDiv);
+
+      Object.keys(tagCounts)
+        .sort((a, b) => tagCounts[b] - tagCounts[a])
+        .slice(0, 50)
+        .forEach(tag => {
+          const div = document.createElement('div');
+          div.className = `sidebar-tag-item ${selectedSidebarTag === tag ? 'active' : ''}`;
+          div.onclick = () => selectTagFilter(tag);
+          div.innerHTML = `<span>#${tag}</span><span>${tagCounts[tag]}</span>`;
+          container.appendChild(div);
+        });
+    }
+
+    function selectTagFilter(tag) {
+      selectedSidebarTag = tag;
+      render();
+    }
+
+    function filterGenre(genre, btn) {
+      currentGenre = genre;
+      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function render() {
+      const db = getDb();
+      renderSidebarTags(db);
+
+      const grid = document.getElementById('artistGrid');
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const filtered = db.filter(a => {
+        const matchGenre = currentGenre === 'all' || a.genre === currentGenre;
+        const matchTag = selectedSidebarTag === '' || (a.tags && a.tags.includes(selectedSidebarTag));
+        const matchSearch = a.name.toLowerCase().includes(search) || 
+                            (a.tags && a.tags.some(f => f.toLowerCase().includes(search)));
+        return matchGenre && matchTag && matchSearch;
+      });
+
+      document.getElementById('statsText').innerText = `Showing ${filtered.length} of ${db.length} artists`;
+      grid.innerHTML = '';
+
+      filtered.forEach(artist => {
+        const extraTagsCount = (artist.tags || []).length - (artist.featuredTags || []).length;
+        const avatarUrl = getAvatarUrl(artist);
+        const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = (e) => {
+          if (e.target.tagName !== 'A' && !e.target.closest('a')) openArtistModal(artist);
+        };
+
+        card.innerHTML = `
+          <img class="card-avatar" referrerpolicy="no-referrer" src="${avatarUrl}" alt="${artist.name}" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+          <h3>${artist.name}</h3>
+          <span class="badge ${artist.genre}">${artist.genre}</span>
+          <div class="tags">
+            ${(artist.featuredTags || []).map(f => `<span class="tag">${f}</span>`).join('')}
+            ${extraTagsCount > 0 ? `<span class="tag more-count">+${extraTagsCount}</span>` : ''}
+          </div>
+          <div class="links-row">
+            ${buildLinksHtml(artist)}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function openArtistModal(artist) {
+      const backdrop = document.getElementById('detailModalBackdrop');
+      const modal = document.getElementById('detailModal');
+
+      backdrop.classList.add('open');
+
+      let samplesHtml = '';
+      if (artist.samples && artist.samples.length > 0) {
+        const resolvedSamples = await Promise.all(artist.samples.map(url => getBlobImageUrl(url)));
+        samplesHtml = resolvedSamples.map(sUrl => `
+          <div class="img-zoom-container">
+            <img class="modal-sample-img" referrerpolicy="no-referrer" src="${sUrl}" alt="sample">
+          </div>
+        `).join('');
+      } else {
+        samplesHtml = `<p style="color:var(--text-muted);">No samples available.</p>`;
+      }
+
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h2>${artist.name}</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <span class="badge ${artist.genre}">${artist.genre}</span>
+        <div class="links-row">
+          ${buildLinksHtml(artist)}
+        </div>
+        <h3>Samples (Hover to Zoom)</h3>
+        <div class="modal-samples">
+          ${samplesHtml}
+        </div>
+        <h3>All Tags</h3>
+        <div class="modal-tags-list">
+          ${(artist.tags || []).map(t => `<span class="tag">#${t}</span>`).join('')}
+        </div>
+      `;
+    }
+
+    function closeModal() {
+      document.getElementById('detailModalBackdrop').classList.remove('open');
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === 'detailModalBackdrop') {
+        closeModal();
+      }
+    }
+
+    function openAdminModal() {
+      const pass = prompt("Enter admin password:");
+      if (pass !== ADMIN_PASS) {
+        if (pass !== null) alert("Incorrect password!");
+        return;
+      }
+
+      const backdrop = document.getElementById('detailModalBackdrop');
+      const modal = document.getElementById('detailModal');
+      backdrop.classList.add('open');
+
+      const db = getDb();
+
+      let listHtml = db.map(a => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px; border-radius:6px; margin-bottom:8px;">
+          <span><strong>${a.name}</strong> (${a.genre})</span>
+          <div>
+            <button class="admin-btn" onclick="editArtistPrompt('${a.name}')">Edit</button>
+            <button class="admin-btn" style="color:var(--furry-badge); border-color:var(--furry-badge);" onclick="deleteArtist('${a.name}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h2>Admin Panel</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div>
+          <button class="genre-btn active" style="width:100%; padding:10px;" onclick="showAddArtistForm()">+ Add New Artist</button>
+        </div>
+        <hr style="border-color:var(--border-color);">
+        <h3>Manage Existing Artists</h3>
+        <div style="max-height:300px; overflow-y:auto;">
+          ${listHtml}
+        </div>
+      `;
+    }
+
+    function showAddArtistForm(editData = null) {
+      const modal = document.getElementById('detailModal');
+      const isEdit = editData !== null;
+      editingOriginalName = isEdit ? editData.name : null;
+
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h2>${isEdit ? 'Edit Artist' : 'Add New Artist'}</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <label style="font-size:0.9rem; color:var(--text-muted);">Artist Name / Danbooru Tag</label>
+          <input type="text" id="adminArtistName" class="search-bar" style="width:100%;" value="${isEdit ? editData.name : ''}" placeholder="e.g. brikot">
+          
+          <label style="font-size:0.9rem; color:var(--text-muted);">Twitter Handle (optional)</label>
+          <input type="text" id="adminTwitter" class="search-bar" style="width:100%;" value="${isEdit ? (editData.twitterHandle || '') : ''}" placeholder="e.g. brikot_art">
+          
+          <label style="font-size:0.9rem; color:var(--text-muted);">Manual Featured Tags (comma-separated, optional)</label>
+          <input type="text" id="adminTags" class="search-bar" style="width:100%;" value="${isEdit ? (editData.featuredTags || []).join(', ') : ''}" placeholder="tits, thighs, creampie">
+          
+          <button class="genre-btn active" style="width:100%; padding:12px; margin-top:10px;" onclick="saveArtistFromAdmin()">Save & Fetch Data</button>
+        </div>
+      `;
+    }
+
+    function editArtistPrompt(name) {
+      const db = getDb();
+      const artist = db.find(a => a.name === name);
+      if (artist) {
+        showAddArtistForm(artist);
+      }
+    }
+
+    async function saveArtistFromAdmin() {
+      const nameInput = document.getElementById('adminArtistName').value.trim();
+      const twitterInput = document.getElementById('adminTwitter').value.trim();
+      const tagsInput = document.getElementById('adminTags').value.trim();
+
+      if (!nameInput) {
+        alert("Artist name cannot be blank.");
+        return;
+      }
+
+      alert("Fetching fresh data from Danbooru, please wait...");
+
+      const newData = await fetchArtistData(nameInput, twitterInput, tagsInput);
+      let db = getDb();
+
+      if (editingOriginalName) {
+        db = db.filter(a => a.name !== editingOriginalName);
+        editingOriginalName = null;
+      }
+
+      db = db.filter(a => a.name.toLowerCase() !== newData.name.toLowerCase());
+      db.push(newData);
+
+      localStorage.setItem('artist_db', JSON.stringify(db));
+      closeModal();
+      render();
+    }
+
+    function deleteArtist(name) {
+      if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+      let db = getDb();
+      db = db.filter(a => a.name !== name);
+      localStorage.setItem('artist_db', JSON.stringify(db));
+      openAdminModal();
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
