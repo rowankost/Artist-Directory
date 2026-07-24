@@ -300,9 +300,9 @@
     }
     .samples-grid img {
       width: 100%;
-      height: auto;
-      max-height: 600px;
-      object-fit: contain;
+      height: auto; /* Preserves the native aspect ratio */
+      max-height: 600px; /* Gives large vertical space for high-res art */
+      object-fit: contain; /* Ensures no part of the artwork is cropped out */
       border-radius: 6px;
       border: 1px solid var(--card-border);
       background-color: #000;
@@ -395,7 +395,7 @@
         <div class="full-tags-list" id="modalAllTags"></div>
       </div>
       <div>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">Top Artwork Samples:</p>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">Top Artwork Samples (via Danbooru):</p>
         <div class="samples-grid" id="modalSamples"></div>
       </div>
       <div class="links-row" id="modalLinks"></div>
@@ -412,11 +412,11 @@
       <div class="admin-artist-list" id="adminArtistList"></div>
 
       <div id="adminStatus" style="font-size: 0.85rem; color: var(--accent);"></div>
-      <input type="text" id="inputName" class="search-bar" placeholder="Artist Target Tag (e.g. brikot)">
+      <input type="text" id="inputName" class="search-bar" placeholder="Artist Danbooru Tag (e.g. brikot)">
       <input type="text" id="inputTwitter" class="search-bar" placeholder="Twitter Handle (e.g. brikot_art)">
       <input type="text" id="inputFeatured" class="search-bar" placeholder="Featured Tags (Comma separated: tits, thighs)">
       
-      <button class="modal-btn" onclick="processAddOrEditArtist()">Auto-Fetch via Proxy & Save</button>
+      <button class="modal-btn" onclick="processAddOrEditArtist()">Auto-Fetch via Danbooru & Save</button>
 
       <div style="display: flex; gap: 8px;">
         <button class="modal-btn danger" style="flex: 1; display: none;" id="btnDelete" onclick="deleteCurrentArtist()">Delete Artist</button>
@@ -459,42 +459,35 @@
       return defaultArtists;
     }
 
-    // Fetches artwork automatically via Rule34 API using a free open proxy
+    // Fetches artwork automatically via Danbooru API (strictly lowercase tag string, limited to 4 images)
     async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
       let samples = [];
       let allTagsSet = new Set();
       let furryScore = 0;
 
-      const cleanTag = artistName.toLowerCase().trim().replace(/\s+/g, "_");
+      // Force lowercase to match Danbooru API requirements
+      const cleanTag = artistName.toLowerCase().trim();
 
       try {
-        const targetUrl = `https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags=${encodeURIComponent(cleanTag)}&limit=4`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-
-        const res = await fetch(proxyUrl);
+        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(cleanTag)}&limit=4`;
+        const res = await fetch(danbooruUrl);
         
         if (res.ok) {
-          const data = await res.json();
-          if (data && data.contents) {
-            const posts = JSON.parse(data.contents);
-            if (Array.isArray(posts) && posts.length > 0) {
-              samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
-              posts.forEach(p => {
-                let tagString = p.tags;
-                if (typeof tagString === 'string') {
-                  tagString.split(' ').forEach(t => {
-                    if (t) {
-                      allTagsSet.add(t);
-                      if (['furry', 'anthro', 'scalie', 'feral'].includes(t)) furryScore++;
-                    }
-                  });
-                }
-              });
-            }
+          const posts = await res.json();
+          if (Array.isArray(posts) && posts.length > 0) {
+            samples = posts.map(p => p.large_file_url || p.file_url ||p.preview_file_url).filter(Boolean);
+            posts.forEach(p => {
+              if (p.tag_string) {
+                p.tag_string.split(' ').forEach(t => {
+                  allTagsSet.add(t);
+                  if (['furry', 'anthro', 'scalie', 'feral'].includes(t)) furryScore++;
+                });
+              }
+            });
           }
         }
       } catch (e) {
-        console.warn("Proxy fetch warning:", e);
+        console.warn("Danbooru fetch warning:", e);
       }
 
       const allTagsArray = Array.from(allTagsSet);
@@ -599,7 +592,7 @@
       filtered.forEach(artist => {
         const extraTagsCount = (artist.tags || []).length - (artist.featuredTags || []).length;
         const avatarUrl = getAvatarUrl(artist);
-        const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+        const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -608,7 +601,7 @@
         };
 
         card.innerHTML = `
-          <img class="card-avatar" referrerpolicy="no-referrer" src="${avatarUrl}" alt="${artist.name}" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+          <img class="card-avatar" referrerpolicy="no-referrer" src="${avatarUrl}" alt="${artist.name}" onerror="this.onerror=null; this.src='${fallbackDanbooruAvatar}';">
           <h3>${artist.name}</h3>
           <span class="badge ${artist.genre}">${artist.genre}</span>
           <div class="tags">
@@ -625,11 +618,11 @@
 
     function openArtistModal(artist) {
       const avatarUrl = getAvatarUrl(artist);
-      const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+      const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
       
       const modalAvatar = document.getElementById('modalAvatar');
       modalAvatar.src = avatarUrl;
-      modalAvatar.onerror = () => { modalAvatar.src = fallbackAvatar; };
+      modalAvatar.onerror = () => { modalAvatar.src = fallbackDanbooruAvatar; };
 
       document.getElementById('modalName').innerText = artist.name;
       document.getElementById('modalTwitterHandle').innerText = artist.twitterHandle ? `@${artist.twitterHandle}` : 'No Twitter handle set';
@@ -645,7 +638,7 @@
       if (artist.samples && artist.samples.length > 0) {
         samplesDiv.innerHTML = artist.samples.map(s => `<img referrerpolicy="no-referrer" src="${s}" alt="sample" onerror="this.style.display='none'">`).join('');
       } else {
-        samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub);">No image previews available via proxy for this tag.</p>';
+        samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub); grid-column:span 2;">No image previews returned from Danbooru for this tag.</p>';
       }
 
       document.getElementById('modalLinks').innerHTML = buildLinksHtml(artist);
@@ -703,7 +696,7 @@
       const status = document.getElementById('adminStatus');
 
       if (!name) return;
-      status.innerText = "Querying via proxy layer...";
+      status.innerText = "Querying Danbooru API...";
 
       const data = await fetchArtistData(name, twitter, featured);
       let db = getDb();
