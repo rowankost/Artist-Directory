@@ -127,18 +127,18 @@ app.delete('/api/artists/:name', async (req, res) => {
 // --- Dedicated endpoint for Goon Corner ---
 app.get('/api/goon-corner', async (req, res) => {
   try {
-    // Fetch every artist from your database
     const artists = await Artist.find({});
     
     if (!artists || artists.length === 0) {
       return res.json([]);
     }
 
-    // Fetch images for all artists simultaneously
+    // Fetch a batch of random posts for each artist in parallel to ensure balanced representation
     const results = await Promise.all(
       artists.map(async (artist) => {
-        const cleanQuery = artist.name.toLowerCase().trim();
-        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(cleanQuery + ' order:random')}&limit=4`;
+        const cleanTag = artist.name.toLowerCase().trim();
+        // Using order:random to get a random assortment per artist
+        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(cleanTag + ' order:random')}&limit=15`;
         
         try {
           const response = await fetch(danbooruUrl, {
@@ -146,6 +146,7 @@ app.get('/api/goon-corner', async (req, res) => {
               'User-Agent': 'ArtistTrackerApp/1.0 (by shock on danbooru)'
             }
           });
+          
           if (response.ok) {
             const posts = await response.json();
             if (Array.isArray(posts) && posts.length > 0) {
@@ -161,8 +162,7 @@ app.get('/api/goon-corner', async (req, res) => {
               if (samples.length > 0) {
                 return {
                   artistName: artist.name,
-                  imageUrls: samples,
-                  postIds: posts.map(p => p.id)
+                  imageUrls: samples
                 };
               }
             }
@@ -174,10 +174,8 @@ app.get('/api/goon-corner', async (req, res) => {
       })
     );
 
-    // Filter out nulls
     const validResults = results.filter(item => item !== null);
 
-    // Flatten all individual image links across every artist into one pool
     let allImagePool = [];
     validResults.forEach(artistResult => {
       artistResult.imageUrls.forEach(url => {
@@ -188,7 +186,7 @@ app.get('/api/goon-corner', async (req, res) => {
       });
     });
 
-    // Shuffle the entire pool and take exactly 50 images total
+    // Shuffle the combined pool completely and slice the target 50 images
     const shuffledImages = allImagePool.sort(() => 0.5 - Math.random());
     const finalSelection = shuffledImages.slice(0, 50);
 
