@@ -322,16 +322,15 @@
     .modal-samples {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 15px;
     }
 
-    /* Image Wrapper with Hover Zoom / Magnifier Effect */
+    /* Google-Images style floating popup zoom on hover */
     .img-zoom-container {
       position: relative;
       width: 100%;
       height: 180px;
       border-radius: 6px;
-      overflow: hidden;
       background: var(--bg-color);
     }
 
@@ -340,16 +339,23 @@
       height: 100%;
       object-fit: cover;
       border-radius: 6px;
-      transition: transform 0.3s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       cursor: zoom-in;
     }
 
+    /* When hovering, scale and pop out over neighboring elements without getting clipped */
     .img-zoom-container:hover .modal-sample-img {
-      transform: scale(1.8); /* Magnifies the image up to 1.8x on hover */
+      transform: scale(1.6);
       object-fit: contain;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 10;
-      position: relative;
+      background: rgba(18, 18, 18, 0.95);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 50;
+      border-radius: 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     }
 
     .modal-tags-list {
@@ -426,7 +432,6 @@
       return defaultArtists;
     }
 
-    // Helper to fetch images via script and convert to safe local blob URLs
     async function getBlobImageUrl(url) {
       if (!url) return '';
       try {
@@ -435,7 +440,7 @@
         const blob = await res.blob();
         return URL.createObjectURL(blob);
       } catch (e) {
-        return url; // Fallback to direct url if CORS restricts the fetch blob
+        return url;
       }
     }
 
@@ -767,7 +772,6 @@
       render();
     }
 
-    // Initial render call on load
     render();
   </script>
 </body>
