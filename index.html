@@ -768,16 +768,21 @@
         return;
       }
 
-      alert("Fetching fresh data from Danbooru, please wait...");
-
-      const newData = await fetchArtistData(nameInput, twitterInput, tagsInput);
-
-      if (editingOriginalName && editingOriginalName !== newData.name) {
+      if (editingOriginalName && editingOriginalName.toLowerCase() !== nameInput.toLowerCase()) {
+        alert(`Updating database records...`);
         await deleteArtistFromServer(editingOriginalName);
       }
       editingOriginalName = null;
 
-      await saveArtistToServer(newData);
+      alert("Sending request to server. The server will fetch from Danbooru and save...");
+
+      const payload = {
+        artistName: nameInput,
+        twitterHandle: twitterInput,
+        manualFeaturedTags: tagsInput
+      };
+
+      await saveArtistToServer(payload);
 
       closeModal();
       render();
