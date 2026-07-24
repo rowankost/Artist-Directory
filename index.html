@@ -758,35 +758,41 @@
       }
     }
 
-    async function saveArtistFromAdmin() {
-      const nameInput = document.getElementById('adminArtistName').value.trim();
-      const twitterInput = document.getElementById('adminTwitter').value.trim();
-      const tagsInput = document.getElementById('adminTags').value.trim();
+async function saveArtistFromAdmin() {
+  const nameInput = document.getElementById('adminArtistName').value.trim();
+  const twitterInput = document.getElementById('adminTwitter').value.trim();
+  const tagsInput = document.getElementById('adminTags').value.trim();
+  const saveBtn = document.querySelector("button[onclick='saveArtistFromAdmin()']");
 
-      if (!nameInput) {
-        alert("Artist name cannot be blank.");
-        return;
-      }
+  if (!nameInput) {
+    alert("Artist name cannot be blank.");
+    return;
+  }
 
-      if (editingOriginalName && editingOriginalName.toLowerCase() !== nameInput.toLowerCase()) {
-        alert(`Updating database records...`);
-        await deleteArtistFromServer(editingOriginalName);
-      }
-      editingOriginalName = null;
+  // Disable the button and show a clean loading message instead of a popup
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerText = "⏳ Fetching & Saving...";
+    saveBtn.style.opacity = "0.6";
+    saveBtn.style.cursor = "not-allowed";
+  }
 
-      alert("Sending request to server. The server will fetch from Danbooru and save...");
+  // Handle renaming deletion if necessary
+  if (editingOriginalName && editingOriginalName.toLowerCase() !== nameInput.toLowerCase()) {
+    await deleteArtistFromServer(editingOriginalName);
+  }
+  editingOriginalName = null;
 
-      const payload = {
-        artistName: nameInput,
-        twitterHandle: twitterInput,
-        manualFeaturedTags: tagsInput
-      };
+  // Send raw input to the server
+  await saveArtistToServer({
+    artistName: nameInput,
+    twitterHandle: twitterInput,
+    manualFeaturedTags: tagsInput
+  });
 
-      await saveArtistToServer(payload);
-
-      closeModal();
-      render();
-    }
+  closeModal();
+  render();
+}
 
     async function deleteArtist(name) {
       if (!confirm(`Are you sure you want to delete ${name}?`)) return;
