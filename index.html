@@ -459,12 +459,17 @@
       return defaultArtists;
     }
 
-    // Helper to bypass hotlinking protection using a public image proxy
-    function proxyUrl(url) {
+    // Helper to fetch images via script and convert to safe local blob URLs
+    async function getBlobImageUrl(url) {
       if (!url) return '';
-      // Strip protocol and proxy through wsrv.nl to safely bypass referer blocks
-      const clean = url.replace(/^https?:\/\//, '');
-      return `https://wsrv.nl/?url=${encodeURIComponent(clean)}`;
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) return url;
+        const blob = await res.blob();
+        return URL.createObjectURL(blob);
+      } catch (e) {
+        return url; // Fallback to direct url if CORS restricts the fetch blob
+      }
     }
 
     async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
@@ -536,7 +541,7 @@
         return `https://unavatar.io/x/${artist.twitterHandle}`;
       }
       if (artist.samples && artist.samples.length > 0) {
-        return proxyUrl(artist.samples[0]);
+        return artist.samples[0];
       }
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
     }
@@ -598,7 +603,7 @@
       filtered.forEach(artist => {
         const extraTagsCount = (artist.tags || []).length - (artist.featuredTags || []).length;
         const avatarUrl = getAvatarUrl(artist);
-        const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? proxyUrl(artist.samples[0]) : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+        const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -607,7 +612,7 @@
         };
 
         card.innerHTML = `
-          <img class="card-avatar" referrerpolicy="no-referrer" src="${avatarUrl}" alt="${artist.name}" onerror="this.onerror=null; this.src='${fallbackDanbooruAvatar}';">
+          <img class="card-avatar" referrerpolicy="no-referrer" src="${avatarUrl}" alt="${artist.name}" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
           <h3>${artist.name}</h3>
           <span class="badge ${artist.genre}">${artist.genre}</span>
           <div class="tags">
@@ -622,13 +627,13 @@
       });
     }
 
-    function openArtistModal(artist) {
+    async function openArtistModal(artist) {
       const avatarUrl = getAvatarUrl(artist);
-      const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? proxyUrl(artist.samples[0]) : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+      const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
       
       const modalAvatar = document.getElementById('modalAvatar');
       modalAvatar.src = avatarUrl;
-      modalAvatar.onerror = () => { modalAvatar.src = fallbackDanbooruAvatar; };
+      modalAvatar.onerror = () => { modalAvatar.src = fallbackAvatar; };
 
       document.getElementById('modalName').innerText = artist.name;
       document.getElementById('modalTwitterHandle').innerText = artist.twitterHandle ? `@${artist.twitterHandle}` : 'No Twitter handle set';
@@ -642,9 +647,14 @@
 
       const samplesDiv = document.getElementById('modalSamples');
       if (artist.samples && artist.samples.length > 0) {
-        samplesDiv.innerHTML = artist.samples.map(s => `
-          <img referrerpolicy="no-referrer" src="${proxyUrl(s)}" alt="sample" onerror="this.outerHTML='<p style=\'font-size:0.8rem; color:var(--text-sub);\'>Preview failed to load</p>'">
-        `).join('');
+        samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub);">Loading image previews...</p>';
+        
+        let imagesHtml = '';
+        for (let s of artist.samples) {
+          const safeUrl = await getBlobImageUrl(s);
+          imagesHtml += `<img referrerpolicy="no-referrer" src="${safeUrl}" alt="sample" onerror="this.outerHTML='<p style=\'font-size:0.8rem; color:var(--text-sub);\'>Preview failed to load</p>'">`;
+        }
+        samplesDiv.innerHTML = imagesHtml;
       } else {
         samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub); grid-column:span 2;">No image previews returned from Danbooru for this tag.</p>';
       }
@@ -699,7 +709,7 @@
 
     async function processAddOrEditArtist() {
       const name = document.getElementById('inputName').value.trim();
-      const twitter = document.include || document.getElementById('inputTwitter').value.trim();
+      const twitter = document.getElementById('inputTwitter').value.trim();
       const featured = document.getElementById('inputFeatured').value.trim();
       const status = document.getElementById('adminStatus');
 
