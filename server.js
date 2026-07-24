@@ -135,7 +135,11 @@ app.get('/api/goon-corner', async (req, res) => {
         const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent('artist:' + formattedTag + ' order:random')}&limit=1`;
         
         try {
-          const response = await fetch(danbooruUrl);
+          const response = await fetch(danbooruUrl, {
+            headers: {
+              'User-Agent': 'ArtistTrackerApp/1.0 (by shock on danbooru)'
+            }
+          });
           if (response.ok) {
             const posts = await response.json();
             if (Array.isArray(posts) && posts.length > 0) {
