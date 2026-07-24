@@ -475,7 +475,7 @@
         if (res.ok) {
           const posts = await res.json();
           if (Array.isArray(posts) && posts.length > 0) {
-            samples = posts.map(p => p.large_file_url || p.file_url || p.preview_file_url).filter(Boolean);
+          samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
             posts.forEach(p => {
               if (p.tag_string) {
                 p.tag_string.split(' ').forEach(t => {
