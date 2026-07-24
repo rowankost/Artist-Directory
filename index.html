@@ -740,6 +740,77 @@
   </div>
 
   <script>
+    // Automated Blacklist configuration for tag filtering
+    const ignoredPatterns = [
+        /^(absurdres|highres|lowres|pixel|commentary|english_commentary|untranslatable|censored|uncensored)$/,
+        /^\d+(girl|boy|girls|boys)$/,
+        /(hair|bangs|ponytail|twintails|sidelocks|braid|locks)$/,
+        /^(blonde|black|brown|white|red|blue|green|purple|aqua|pink|grey|multicolored|two-tone)_hair$/,
+        /(eyes|gaze|pupils)$/,
+        /^(blue|green|red|yellow|pink|purple|grey|dark|heterochromia)_eyes$/,
+        /^(closed_eyes|looking_at_viewer|looking_back|one_eye_closed|half-closed_eyes|rolling_eyes)$/,
+        /^(blush|smile|open_mouth|closed_mouth|tongue|teeth|sharp_teeth)$/,
+        /(background|wallpaper)$/,
+        /^(black|white|red|blue|pink|yellow|purple|grey)_(shoes|gloves|thighhighs|pants|veil|mask|bowtie|bow|hat|jacket)$/
+    ];
+
+    function filterIrrelevantTags(tagString) {
+        if (!tagString) return [];
+        // Handle input whether it's passed as a string or an array
+        const tags = Array.isArray(tagString) ? tagString : tagString.split('#').map(t => t.trim()).filter(Boolean);
+        
+        return tags.filter(tag => {
+            const cleanTag = tag.toLowerCase();
+            return !ignoredPatterns.some(pattern => pattern.test(cleanTag));
+        });
+    }
+
+    const TARGET_WHITELIST = [
+        "anal", "vaginal", "loli", "shota", "cum_in_pussy", 
+        "deepthroat", "cum_in_ass", "gaping", "stray_pubic_hair", 
+        "lipstick_mark", "mating_press", "instant_loss"
+    ];
+
+    async function fetchArtistTagFrequency(artistName) {
+        let tagCounts = {};
+        TARGET_WHITELIST.forEach(t => tagCounts[t] = 0);
+        
+        let page = 1;
+        let limit = 100;
+        
+        try {
+            while (true) {
+                const url = `https://danbooru.donmai.us/posts.json?tags=artist:${encodeURIComponent(artistName)}&page=${page}&limit=${limit}`;
+                const response = await fetch(url, { headers: { "Accept": "application/json" } });
+                
+                if (!response.ok) break;
+                
+                const posts = await response.json();
+                if (!posts || posts.length === 0) break;
+                
+                posts.forEach(post => {
+                    const postTags = (post.tag_string || "").split(/\s+/);
+                    postTags.forEach(t => {
+                        if (tagCounts.hasOwnProperty(t)) {
+                            tagCounts[t]++;
+                        }
+                    });
+                });
+                
+                if (posts.length < limit) break;
+                page++;
+            }
+        } catch (err) {
+            console.error("Error fetching paginated artist posts:", err);
+        }
+
+        const sorted = Object.entries(tagCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count);
+
+        return sorted.slice(0, 5);
+    }
+
     let secretUnlocked = false;
 
     function verifyAge(adult) {
@@ -897,7 +968,9 @@
       db.forEach(a => {
         if (!secretUnlocked && isRestrictedArtist(a)) return;
         
-        (a.tags || []).forEach(f => {
+        // Use the filter on tags to tally relevant metadata items
+        const cleanTags = filterIrrelevantTags(a.tags || []);
+        cleanTags.forEach(f => {
           tagCounts[f] = (tagCounts[f] || 0) + 1;
         });
       });
@@ -987,7 +1060,9 @@
       grid.innerHTML = '';
 
       filtered.forEach(artist => {
-        const extraTagsCount = (artist.tags || []).length - (artist.featuredTags || []).length;
+        // Apply the automated blacklist filter on displayed tags
+        const cleanFeaturedTags = filterIrrelevantTags(artist.featuredTags || artist.tags || []);
+        const extraTagsCount = cleanFeaturedTags.length - (artist.featuredTags || []).length;
         const avatarUrl = getAvatarUrl(artist);
         const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
 
@@ -1002,8 +1077,7 @@
           <h3>${artist.name}</h3>
           <span class="badge ${artist.genre}">${artist.genre}</span>
           <div class="tags">
-            ${(artist.featuredTags || []).map(f => `<span class="tag">${f}</span>`).join('')}
-            ${extraTagsCount > 0 ? `<span class="tag more-count">+${extraTagsCount}</span>` : ''}
+            ${cleanFeaturedTags.slice(0, 6).map(f => `<span class="tag">#${f}</span>`).join('')}
           </div>
           <div class="links-row">
             ${buildLinksHtml(artist)}
@@ -1088,6 +1162,7 @@
         samplesHtml = `<p style="color:var(--text-muted);">No samples available.</p>`;
       }
 
+      // Renders the modal shell and sets up a loading state for the paginated bar graph
       modal.innerHTML = `
         <div class="modal-header">
           <h2>${artist.name}</h2>
@@ -1101,11 +1176,37 @@
         <div class="modal-samples">
           ${samplesHtml}
         </div>
-        <h3>All Tags</h3>
-        <div class="modal-tags-list">
-          ${(artist.tags || []).map(t => `<span class="tag">#${t}</span>`).join('')}
+        <h3>Top 5 Tag Frequencies</h3>
+        <div id="modalBarGraphContainer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          <p style="color: var(--text-muted);">Scanning complete post history...</p>
         </div>
       `;
+
+      // Executes the full pagination scan in the background and populates the bar graph when ready
+      const topTags = await fetchArtistTagFrequency(artist.name);
+      const graphContainer = document.getElementById('modalBarGraphContainer');
+      
+      if (!graphContainer) return;
+
+      if (topTags.length === 0 || topTags[0].count === 0) {
+        graphContainer.innerHTML = `<p style="color: var(--text-muted);">No matching whitelist tags found in this artist's archive.</p>`;
+        return;
+      }
+
+      const maxCount = topTags[0].count;
+
+      graphContainer.innerHTML = topTags.map(item => {
+        const percentage = maxCount > 0 ? ((item.count / maxCount) * 100).toFixed(1) : 0;
+        return `
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem;">
+            <span style="width: 130px; color: var(--text-muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.name}">${item.name}</span>
+            <div style="flex: 1; background: var(--bg-color); height: 16px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color);">
+              <div style="width: ${percentage}%; background: var(--accent); height: 100%; transition: width 0.4s ease;"></div>
+            </div>
+            <span style="width: 50px; color: var(--text-color); font-weight: bold; text-align: left;">${item.count}</span>
+          </div>
+        `;
+      }).join('');
     }
 
     function closeModal() {
