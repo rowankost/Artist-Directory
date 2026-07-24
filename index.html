@@ -71,32 +71,6 @@
       background: rgba(187, 134, 252, 0.05);
     }
 
-    .genre-filter {
-      display: flex;
-      padding: 10px 20px;
-      gap: 10px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .genre-btn {
-      flex: 1;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    .genre-btn.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      font-weight: bold;
-    }
-
     .sidebar-tags-container {
       flex: 1;
       overflow-y: auto;
@@ -165,109 +139,6 @@
       font-size: 0.9rem;
     }
 
-    .artist-grid {
-      padding: 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-    }
-
-    /* Card */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 15px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
-    }
-
-    .card-avatar {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 6px;
-      background: var(--bg-color);
-    }
-
-    .card h3 {
-      font-size: 1.1rem;
-      color: var(--text-color);
-    }
-
-    .badge {
-      align-self: flex-start;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      font-weight: bold;
-    }
-
-    .badge.normal {
-      background: rgba(3, 218, 198, 0.15);
-      color: var(--normal-badge);
-    }
-
-    .badge.furry {
-      background: rgba(207, 102, 121, 0.15);
-      color: var(--furry-badge);
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    .tag {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
-
-    .tag.more-count {
-      color: var(--accent);
-      background: rgba(187, 134, 252, 0.1);
-    }
-
-    .links-row {
-      display: flex;
-      gap: 10px;
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .links-row a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .links-row a:hover {
-      color: var(--accent);
-    }
-
-    .favicon {
-      width: 14px;
-      height: 14px;
-      object-fit: contain;
-    }
-
     /* Modal */
     .modal-backdrop {
       position: fixed;
@@ -329,7 +200,6 @@
       overflow: visible;
     }
 
-    /* True Floating Hover Zoom */
     .img-zoom-container {
       position: relative;
       width: 100%;
@@ -369,8 +239,7 @@
       gap: 6px;
     }
 
-    /* --- NEW FEATURES ROUTING LAYOUTS --- */
-    
+    /* Portal Overlays */
     .portal-overlay {
       position: fixed;
       top: 0;
@@ -449,7 +318,6 @@
       opacity: 0.9;
     }
 
-    /* Selection Grid Menu Options */
     .menu-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -474,7 +342,7 @@
       background: rgba(187, 134, 252, 0.05);
     }
 
-    /* Horizontal Category Navigation Tabs Bar - Updated to Big Buttons */
+    /* Top Navigation Tabs Bar */
     .top-nav-tabs {
       height: 75px;
       background: var(--card-bg);
@@ -504,7 +372,6 @@
       align-items: center;
     }
 
-    /* Big Chunky Action Button Tabs */
     .nav-tab {
       background: var(--bg-color);
       border: 1px solid var(--border-color);
@@ -536,7 +403,6 @@
       box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
     }
 
-    /* Hidden tabs logic */
     .nav-tab.secret-tab {
       display: none;
     }
@@ -551,17 +417,54 @@
       gap: 10px;
     }
 
-    /* Style Badges for the new groups */
+    .badge {
+      align-self: flex-start;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .badge.normal {
+      background: rgba(3, 218, 198, 0.15);
+      color: var(--normal-badge);
+    }
+
+    .badge.furry {
+      background: rgba(207, 102, 121, 0.15);
+      color: var(--furry-badge);
+    }
+
     .badge.loli {
       background: rgba(187, 134, 252, 0.15);
       color: #ffb74d;
     }
+    
     .badge.shota {
       background: rgba(3, 218, 198, 0.15);
       color: #64b5f6;
     }
 
-    /* --- ARTIST DIRECTORY DESIGN SPICE UP --- */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .tag.more-count {
+      color: var(--accent);
+      background: rgba(187, 134, 252, 0.1);
+    }
+
     .artist-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -580,6 +483,10 @@
       transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
                   border-color 0.3s ease, 
                   box-shadow 0.3s ease !important;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .card:hover {
@@ -590,13 +497,21 @@
     }
 
     .card-avatar {
-      border-radius: 8px !important;
+      width: 100%;
       height: 220px !important;
+      object-fit: cover;
+      border-radius: 8px !important;
+      background: var(--bg-color);
       transition: transform 0.4s ease;
     }
 
     .card:hover .card-avatar {
       transform: scale(1.02);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      color: var(--text-color);
     }
 
     .links-row {
@@ -616,16 +531,27 @@
       font-size: 0.8rem !important;
       font-weight: 500;
       color: var(--text-color) !important;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
       transition: all 0.2s ease !important;
     }
 
     .links-row a:hover {
       background: rgba(187, 134, 252, 0.15) !important;
       border-color: var(--accent) !important;
+      color: var(--accent) !important;
       transform: scale(1.05);
     }
 
-    /* Secret Trigger Button at Bottom of Sidebar Tags */
+    .favicon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+    }
+
+    /* Sidebar Footer Secret Trigger */
     .sidebar-footer-secret {
       padding: 15px 20px;
       border-top: 1px solid var(--border-color);
@@ -657,94 +583,6 @@
       object-fit: contain;
       border-radius: 6px;
       display: block;
-    }
-
-    /* --- MOBILE RESPONSIVENESS OVERRIDES --- */
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column !important;
-        min-height: 100vh;
-      }
-
-      aside {
-        width: 100% !important;
-        height: auto !important;
-        position: relative !important;
-        border-right: none !important;
-        border-bottom: 1px solid var(--border-color) !important;
-      }
-
-      .sidebar-header {
-        padding: 15px 20px !important;
-      }
-
-      .sidebar-tags-container {
-        display: flex !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        padding: 10px 20px !important;
-        gap: 8px !important;
-        white-space: nowrap !important;
-      }
-
-      .sidebar-tag-item {
-        display: inline-flex !important;
-        margin-bottom: 0 !important;
-        padding: 6px 12px !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid var(--border-color) !important;
-      }
-
-      main {
-        height: auto !important;
-        overflow-y: visible !important;
-      }
-
-      .top-bar {
-        flex-direction: column !important;
-        gap: 12px !important;
-        align-items: stretch !important;
-        padding: 15px !important;
-      }
-
-      .search-bar {
-        width: 100% !important;
-      }
-
-      .top-nav-tabs {
-        flex-direction: column !important;
-        height: auto !important;
-        padding: 10px !important;
-        gap: 10px !important;
-      }
-
-      .nav-tabs-container {
-        overflow-x: auto !important;
-        width: 100% !important;
-        justify-content: flex-start !important;
-        padding-bottom: 5px !important;
-      }
-
-      .nav-tab {
-        padding: 8px 15px !important;
-        font-size: 0.9rem !important;
-        height: auto !important;
-      }
-
-      .artist-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)) !important;
-        padding: 15px !important;
-        gap: 15px !important;
-      }
-
-      .modal {
-        width: 95% !important;
-        padding: 15px !important;
-      }
-
-      .modal-samples {
-        grid-template-columns: 1fr !important;
-      }
     }
   </style>
 </head>
@@ -779,7 +617,7 @@
     </div>
   </div>
 
-  <!-- STEP 3: Your Actual Interactive Grid Layout (Hidden until unlocked) -->
+  <!-- STEP 3: Actual Interactive Grid Layout -->
   <div id="appInterface" style="display: none; width: 100%; min-height: 100vh; flex-direction: column;">
     
     <!-- Top Tabs Header Nav bar -->
@@ -807,12 +645,12 @@
           <span>Filter Tags</span>
         </div>
         <div class="sidebar-tags-container" id="sidebarTags">
-          <!-- Populated dynamically by script -->
+          <!-- Populated dynamically -->
         </div>
-        <!-- Secret Trigger Button at the bottom of the sidebar -->
+        <!-- Secret Trigger Button with working public Hat Kid GIF link -->
         <div class="sidebar-footer-secret">
           <button class="secret-gif-btn" onclick="unlockSecretTabs()" title="???">
-            <img src="a-hat-in-time-hat-kid.jpg" alt="Secret trigger">
+            <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmo2MmZ3anF5ZmRtbW9xOHJvYXpxM3B6OXFheDVnbzR2ZHRzZXByaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3xgvRmi51d8iK7bUfg/giphy.gif" alt="Secret trigger">
           </button>
           <span style="font-size: 0.75rem; color: var(--text-muted);">???</span>
         </div>
@@ -825,7 +663,7 @@
           <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
         </div>
         <div class="artist-grid" id="artistGrid">
-          <!-- Populated dynamically by script -->
+          <!-- Populated dynamically -->
         </div>
       </main>
     </div>
@@ -833,9 +671,7 @@
 
   <!-- Detail Popout Modal -->
   <div class="modal-backdrop" id="detailModalBackdrop" onclick="closeModalOnBackdrop(event)">
-    <div class="modal" id="detailModal">
-      <!-- Populated dynamically -->
-    </div>
+    <div class="modal" id="detailModal"></div>
   </div>
 
   <script>
@@ -853,16 +689,14 @@
     function unlockSecretTabs() {
       if (!secretUnlocked) {
         secretUnlocked = true;
-        // Unhide tabs at top
         document.querySelectorAll('.secret-tab').forEach(tab => tab.classList.add('unlocked'));
-        // Unhide cards in main menu selection grid
         document.querySelectorAll('.secret-menu-card').forEach(card => card.style.display = 'block');
         alert("enjoy u degenerate");
+        render();
       }
     }
 
     function enterDirectory(genreSelection) {
-      // If user tries to access loli/shota via code/selection without unlock, block or reset
       if ((genreSelection === 'loli' || genreSelection === 'shota') && !secretUnlocked) {
         genreSelection = 'all';
       }
@@ -883,7 +717,6 @@
     }
 
     function switchGenreTab(selectedGroup, buttonRef) {
-      // If locked and trying to select secret categories, reject
       if ((selectedGroup === 'loli' || selectedGroup === 'shota') && !secretUnlocked) {
         return;
       }
@@ -905,7 +738,6 @@
     let selectedSidebarTag = '';
     let editingOriginalName = null;
 
-    // --- Server API Fetch Functions ---
     async function getDb() {
       try {
         const res = await fetch('/api/artists');
@@ -955,6 +787,16 @@
       }
     }
 
+    function isRestrictedArtist(artist) {
+      const genre = (artist.genre || '').toLowerCase();
+      const tags = artist.tags || [];
+      const hasRestrictedTag = tags.some(t => {
+        const lt = t.toLowerCase().trim();
+        return lt === 'loli' || lt === 'shota';
+      });
+      return genre === 'loli' || genre === 'shota' || hasRestrictedTag;
+    }
+
     function buildLinksHtml(artist) {
       const twitterHandle = artist.twitterHandle;
       const twitterUrl = twitterHandle 
@@ -988,10 +830,7 @@
     function renderSidebarTags(db) {
       const tagCounts = {};
       db.forEach(a => {
-        // If secret is not unlocked, filter out loli/shota artists from counting or visibility if desired, 
-        // but requirement says: "If those two tabs are not active the artists under those tabs dont show up."
-        // We handle visibility filtering in render().
-        if (!secretUnlocked && (a.genre === 'loli' || a.genre === 'shota')) return;
+        if (!secretUnlocked && isRestrictedArtist(a)) return;
         
         (a.tags || []).forEach(f => {
           tagCounts[f] = (tagCounts[f] || 0) + 1;
@@ -1003,10 +842,9 @@
 
       const clearDiv = document.createElement('div');
       clearDiv.className = `sidebar-tag-item ${selectedSidebarTag === '' ? 'active' : ''}`;
-      clearDiv.id = 'clearTagBtn';
       clearDiv.onclick = () => selectTagFilter('');
       
-      const visibleDbCount = db.filter(a => secretUnlocked || (a.genre !== 'loli' && a.genre !== 'shota')).length;
+      const visibleDbCount = db.filter(a => secretUnlocked || !isRestrictedArtist(a)).length;
       clearDiv.innerHTML = `<span>All Tags</span><span>${visibleDbCount}</span>`;
       container.appendChild(clearDiv);
 
@@ -1035,11 +873,8 @@
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
 
       const filtered = db.filter(a => {
-        // Enforce hiding loli and shota artists if secret is not unlocked, or if those tabs are not active
-        if (!secretUnlocked && (a.genre === 'loli' || a.genre === 'shota')) {
-          return false;
-        }
-        if ((a.genre === 'loli' || a.genre === 'shota') && currentGenre !== 'loli' && currentGenre !== 'shota' && currentGenre !== 'all') {
+        // Enforce strict hidden rules until unlocked
+        if (!secretUnlocked && isRestrictedArtist(a)) {
           return false;
         }
 
@@ -1050,7 +885,7 @@
         return matchGenre && matchTag && matchSearch;
       });
 
-      const totalVisibleDb = db.filter(a => secretUnlocked || (a.genre !== 'loli' && a.genre !== 'shota')).length;
+      const totalVisibleDb = db.filter(a => secretUnlocked || !isRestrictedArtist(a)).length;
       document.getElementById('statsText').innerText = `Showing ${filtered.length} of ${totalVisibleDb} artists`;
       grid.innerHTML = '';
 
@@ -1129,7 +964,6 @@
       }
     }
 
-    // --- Creator Modal Page ---
     function openCreatorModal() {
       const backdrop = document.getElementById('detailModalBackdrop');
       const modal = document.getElementById('detailModal');
