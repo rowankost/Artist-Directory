@@ -459,6 +459,14 @@
       return defaultArtists;
     }
 
+    // Helper to bypass hotlinking protection using a public image proxy
+    function proxyUrl(url) {
+      if (!url) return '';
+      // Strip protocol and proxy through wsrv.nl to safely bypass referer blocks
+      const clean = url.replace(/^https?:\/\//, '');
+      return `https://wsrv.nl/?url=${encodeURIComponent(clean)}`;
+    }
+
     async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
       let samples = [];
       let allTagsSet = new Set();
@@ -528,7 +536,7 @@
         return `https://unavatar.io/x/${artist.twitterHandle}`;
       }
       if (artist.samples && artist.samples.length > 0) {
-        return artist.samples[0];
+        return proxyUrl(artist.samples[0]);
       }
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
     }
@@ -590,7 +598,7 @@
       filtered.forEach(artist => {
         const extraTagsCount = (artist.tags || []).length - (artist.featuredTags || []).length;
         const avatarUrl = getAvatarUrl(artist);
-        const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+        const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? proxyUrl(artist.samples[0]) : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -616,7 +624,7 @@
 
     function openArtistModal(artist) {
       const avatarUrl = getAvatarUrl(artist);
-      const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+      const fallbackDanbooruAvatar = (artist.samples && artist.samples.length > 0) ? proxyUrl(artist.samples[0]) : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
       
       const modalAvatar = document.getElementById('modalAvatar');
       modalAvatar.src = avatarUrl;
@@ -635,7 +643,7 @@
       const samplesDiv = document.getElementById('modalSamples');
       if (artist.samples && artist.samples.length > 0) {
         samplesDiv.innerHTML = artist.samples.map(s => `
-          <img referrerpolicy="no-referrer" src="${s}" alt="sample" onerror="this.outerHTML='<p style=\'font-size:0.8rem; color:var(--text-sub);\'>Preview failed to load</p>'">
+          <img referrerpolicy="no-referrer" src="${proxyUrl(s)}" alt="sample" onerror="this.outerHTML='<p style=\'font-size:0.8rem; color:var(--text-sub);\'>Preview failed to load</p>'">
         `).join('');
       } else {
         samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub); grid-column:span 2;">No image previews returned from Danbooru for this tag.</p>';
@@ -691,7 +699,7 @@
 
     async function processAddOrEditArtist() {
       const name = document.getElementById('inputName').value.trim();
-      const twitter = document.getElementById('inputTwitter').value.trim();
+      const twitter = document.include || document.getElementById('inputTwitter').value.trim();
       const featured = document.getElementById('inputFeatured').value.trim();
       const status = document.getElementById('adminStatus');
 
