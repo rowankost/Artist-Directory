@@ -942,13 +942,14 @@
         sidebarArea.style.display = 'none';
         mainArea.innerHTML = `
           <div class="top-bar">
-            <input type="text" id="goonSearchInput" class="search-bar" style="width: 100%; max-width: 600px;" placeholder="Search tag for Goon Corner (e.g. deepthroat)..." oninput="renderGoonCorner()">
+            <button class="admin-btn active" style="padding: 10px 20px; font-weight: bold;" onclick="renderGoonCorner()">🔥 Goon Again</button>
             <div class="stats-text" id="goonStatsText">Showing 0 images</div>
           </div>
           <div class="goon-grid" id="goonGrid">
-            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Type a tag above to generate randomized samples across all artists.</div>
+            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Click "Goon Again" to load randomized samples across all artists.</div>
           </div>
         `;
+        renderGoonCorner();
         return;
       } else {
         sidebarArea.style.display = 'flex';
@@ -1014,60 +1015,39 @@
     }
 
     async function renderGoonCorner() {
-      const queryInput = document.getElementById('goonSearchInput');
-      const query = queryInput ? queryInput.value.toLowerCase().trim() : '';
       const grid = document.getElementById('goonGrid');
       const stats = document.getElementById('goonStatsText');
 
-      if (!query) {
-        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Type a tag above to generate randomized samples across all artists.</div>`;
-        if (stats) stats.innerText = `Showing 0 images`;
-        return;
-      }
+      if (!grid) return;
 
-      const db = await getDb();
-      let accumulatedImages = [];
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading random Goon Corner images...</div>`;
 
-      // Loop through every artist on the site
-      db.forEach(artist => {
-        if (!secretUnlocked && isRestrictedArtist(artist)) return;
+      try {
+        const res = await fetch('/api/goon-corner');
+        if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
+        
+        const accumulatedImages = await res.json();
 
-        // Check if artist contains the searched tag
-        const tags = artist.tags || [];
-        const hasTag = tags.some(t => t.toLowerCase().includes(query));
+        if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
 
-        if (hasTag && artist.samples && artist.samples.length > 0) {
-          // Shuffle or select random images from this artist's samples pool (e.g., pick 3 random ones)
-          const shuffledSamples = [...artist.samples].sort(() => 0.5 - Math.random());
-          const selectedSamples = shuffledSamples.slice(0, 3);
-
-          selectedSamples.forEach(imgUrl => {
-            accumulatedImages.push({
-              artistName: artist.name,
-              url: imgUrl
-            });
-          });
+        if (accumulatedImages.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
+          return;
         }
-      });
 
-      // Shuffle the final massive collection for randomized variety
-      accumulatedImages.sort(() => 0.5 - Math.random());
-
-      if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
-
-      if (accumulatedImages.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No matching artist posts found for tag "${query}".</div>`;
-        return;
-      }
-
-      grid.innerHTML = accumulatedImages.map(item => `
-        <div class="goon-card">
-          <div class="goon-img-container img-zoom-container">
-            <img class="goon-img modal-sample-img" referrerpolicy="no-referrer" src="${item.url}" alt="${item.artistName}" onerror="this.style.display='none'">
+        grid.innerHTML = accumulatedImages.map(item => `
+          <div class="goon-card">
+            <div class="goon-img-container img-zoom-container">
+              <img class="goon-img modal-sample-img" referrerpolicy="no-referrer" src="${item.imageUrl || item.url}" alt="${item.artistName}" onerror="this.style.display='none'">
+            </div>
+            <div class="goon-footer">🎨 ${item.artistName}</div>
           </div>
-          <div class="goon-footer">🎨 ${item.artistName}</div>
-        </div>
-      `).join('');
+        `).join('');
+
+      } catch (err) {
+        console.error("Error loading Goon Corner:", err);
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
+      }
     }
 
     async function openArtistModal(artist) {
