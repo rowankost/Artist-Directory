@@ -603,6 +603,98 @@
   border-color: var(--accent) !important;
   transform: scale(1.05);
 }
+    /* --- MOBILE RESPONSIVENESS OVERRIDES --- */
+@media (max-width: 768px) {
+  /* Stack the sidebar and main body vertically */
+  body {
+    flex-direction: column !important;
+    min-height: 100vh;
+  }
+
+  /* Make the sidebar full width and let it scroll horizontally */
+  aside {
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+  }
+
+  .sidebar-header {
+    padding: 15px 20px !important;
+  }
+
+  /* Force the tag collection to scroll side-to-side instead of stacking downward */
+  .sidebar-tags-container {
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 10px 20px !important;
+    gap: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .sidebar-tag-item {
+    display: inline-flex !important;
+    margin-bottom: 0 !important;
+    padding: 6px 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border-color) !important;
+  }
+
+  /* Clean up the main workspace and navigation bar views */
+  main {
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  .top-bar {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+    padding: 15px !important;
+  }
+
+  .search-bar {
+    width: 100% !important;
+  }
+
+  .top-nav-tabs {
+    flex-direction: column !important;
+    height: auto !important;
+    padding: 10px !important;
+    gap: 10px !important;
+  }
+
+  .nav-tabs-container {
+    overflow-x: auto !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding-bottom: 5px !important;
+  }
+
+  .nav-tab {
+    padding: 10px 15px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Automatically size your card grid to perfectly fit phone dimensions */
+  .artist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)) !important;
+    padding: 15px !important;
+    gap: 15px !important;
+  }
+
+  /* Make popout detail windows scale beautifully on touch displays */
+  .modal {
+    width: 95% !important;
+    padding: 15px !important;
+  }
+
+  .modal-samples {
+    grid-template-columns: 1fr !important; /* Stack artist samples vertically */
+  }
+}
   </style>
 </head>
 <body>
