@@ -342,6 +342,13 @@
       background: rgba(187, 134, 252, 0.05);
     }
 
+    .menu-card.goon-card {
+      background: rgba(187, 134, 252, 0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+      grid-column: 1 / -1;
+    }
+
     /* Top Navigation Tabs Bar */
     .top-nav-tabs {
       height: 75px;
@@ -411,6 +418,16 @@
       display: flex;
     }
 
+    .nav-tab.goon-corner-tab {
+      background: rgba(187, 134, 252, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .nav-tab.goon-corner-tab:hover, .nav-tab.goon-corner-tab.active {
+      background: var(--accent);
+      color: #000;
+    }
+
     .nav-actions-group {
       display: flex;
       align-items: center;
@@ -470,6 +487,52 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 25px;
       padding: 25px;
+    }
+
+    /* Goon Corner Grid Layout */
+    .goon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      padding: 25px;
+    }
+
+    .goon-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .goon-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+
+    .goon-img-container {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: var(--bg-color);
+    }
+
+    .goon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .goon-footer {
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card {
@@ -613,6 +676,7 @@
         <button class="menu-card" onclick="enterDirectory('furry')">🐾 Furry</button>
         <button class="menu-card secret-menu-card" style="display:none;" onclick="enterDirectory('loli')">🌸 Loli</button>
         <button class="menu-card secret-menu-card" style="display:none;" onclick="enterDirectory('shota')">⚡ Shota</button>
+        <button class="menu-card goon-card" onclick="enterDirectory('goon')">🔥 Goon Corner</button>
       </div>
     </div>
   </div>
@@ -630,6 +694,7 @@
         <!-- Secret tabs hidden by default -->
         <button class="nav-tab secret-tab" data-genre="loli" onclick="switchGenreTab('loli', this)">Loli</button>
         <button class="nav-tab secret-tab" data-genre="shota" onclick="switchGenreTab('shota', this)">Shota</button>
+        <button class="nav-tab goon-corner-tab" data-genre="goon" onclick="switchGenreTab('goon', this)">🔥 Goon Corner</button>
       </div>
       <div class="nav-actions-group">
         <button class="admin-btn" onclick="openCreatorModal()">Creator</button>
@@ -638,9 +703,9 @@
     </nav>
 
     <!-- Content Workspace -->
-    <div style="display: flex; flex: 1;">
+    <div style="display: flex; flex: 1;" id="workspaceContainer">
       <!-- Sidebar Tags Filter -->
-      <aside>
+      <aside id="sidebarArea">
         <div class="sidebar-header" style="font-size:1.1rem; border-bottom: 1px solid var(--border-color);">
           <span>Filter Tags</span>
         </div>
@@ -657,7 +722,7 @@
       </aside>
 
       <!-- Main Directory View -->
-      <main>
+      <main id="mainArea">
         <div class="top-bar">
           <input type="text" id="searchInput" class="search-bar" placeholder="Search artists or tags..." oninput="render()">
           <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
@@ -869,11 +934,41 @@
       const db = await getDb();
       renderSidebarTags(db);
 
+      const sidebarArea = document.getElementById('sidebarArea');
+      const mainArea = document.getElementById('mainArea');
+
+      // Check if Goon Corner page is active
+      if (currentGenre === 'goon') {
+        sidebarArea.style.display = 'none';
+        mainArea.innerHTML = `
+          <div class="top-bar">
+            <input type="text" id="goonSearchInput" class="search-bar" style="width: 100%; max-width: 600px;" placeholder="Search tag for Goon Corner (e.g. deepthroat)..." oninput="renderGoonCorner()">
+            <div class="stats-text" id="goonStatsText">Showing 0 images</div>
+          </div>
+          <div class="goon-grid" id="goonGrid">
+            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Type a tag above to generate randomized samples across all artists.</div>
+          </div>
+        `;
+        return;
+      } else {
+        sidebarArea.style.display = 'flex';
+        // Restore standard main area structure if coming from Goon Corner
+        if (!document.getElementById('artistGrid')) {
+          mainArea.innerHTML = `
+            <div class="top-bar">
+              <input type="text" id="searchInput" class="search-bar" placeholder="Search artists or tags..." oninput="render()">
+              <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
+            </div>
+            <div class="artist-grid" id="artistGrid"></div>
+          `;
+        }
+      }
+
       const grid = document.getElementById('artistGrid');
-      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const searchInputElem = document.getElementById('searchInput');
+      const search = searchInputElem ? searchInputElem.value.toLowerCase().trim() : '';
 
       const filtered = db.filter(a => {
-        // Enforce strict hidden rules until unlocked
         if (!secretUnlocked && isRestrictedArtist(a)) {
           return false;
         }
@@ -886,7 +981,9 @@
       });
 
       const totalVisibleDb = db.filter(a => secretUnlocked || !isRestrictedArtist(a)).length;
-      document.getElementById('statsText').innerText = `Showing ${filtered.length} of ${totalVisibleDb} artists`;
+      const statsElem = document.getElementById('statsText');
+      if (statsElem) statsElem.innerText = `Showing ${filtered.length} of ${totalVisibleDb} artists`;
+      if (!grid) return;
       grid.innerHTML = '';
 
       filtered.forEach(artist => {
@@ -914,6 +1011,63 @@
         `;
         grid.appendChild(card);
       });
+    }
+
+    async function renderGoonCorner() {
+      const queryInput = document.getElementById('goonSearchInput');
+      const query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+      const grid = document.getElementById('goonGrid');
+      const stats = document.getElementById('goonStatsText');
+
+      if (!query) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Type a tag above to generate randomized samples across all artists.</div>`;
+        if (stats) stats.innerText = `Showing 0 images`;
+        return;
+      }
+
+      const db = await getDb();
+      let accumulatedImages = [];
+
+      // Loop through every artist on the site
+      db.forEach(artist => {
+        if (!secretUnlocked && isRestrictedArtist(artist)) return;
+
+        // Check if artist contains the searched tag
+        const tags = artist.tags || [];
+        const hasTag = tags.some(t => t.toLowerCase().includes(query));
+
+        if (hasTag && artist.samples && artist.samples.length > 0) {
+          // Shuffle or select random images from this artist's samples pool (e.g., pick 3 random ones)
+          const shuffledSamples = [...artist.samples].sort(() => 0.5 - Math.random());
+          const selectedSamples = shuffledSamples.slice(0, 3);
+
+          selectedSamples.forEach(imgUrl => {
+            accumulatedImages.push({
+              artistName: artist.name,
+              url: imgUrl
+            });
+          });
+        }
+      });
+
+      // Shuffle the final massive collection for randomized variety
+      accumulatedImages.sort(() => 0.5 - Math.random());
+
+      if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
+
+      if (accumulatedImages.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No matching artist posts found for tag "${query}".</div>`;
+        return;
+      }
+
+      grid.innerHTML = accumulatedImages.map(item => `
+        <div class="goon-card">
+          <div class="goon-img-container img-zoom-container">
+            <img class="goon-img modal-sample-img" referrerpolicy="no-referrer" src="${item.url}" alt="${item.artistName}" onerror="this.style.display='none'">
+          </div>
+          <div class="goon-footer">🎨 ${item.artistName}</div>
+        </div>
+      `).join('');
     }
 
     async function openArtistModal(artist) {
