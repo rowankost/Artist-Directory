@@ -61,7 +61,7 @@ app.post('/api/artists', async (req, res) => {
     let furryScore = 0;
 
     try {
-      const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=artist:${encodeURIComponent(cleanTag)}+order:score&limit=4`;
+      const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(cleanTag + ' order:score')}&limit=4`;
       const response = await fetch(danbooruUrl);
       if (response.ok) {
         const posts = await response.json();
