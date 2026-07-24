@@ -6,425 +6,373 @@
   <title>Artist Directory</title>
   <style>
     :root {
-      --bg-dark: #0f0f13;
-      --card-bg: #181820;
-      --card-border: #262633;
-      --accent: #e91e63;
-      --accent-hover: #ff2a73;
-      --text-main: #f0f0f8;
-      --text-sub: #9090a8;
-      --sidebar-width: 260px;
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --text-muted: #aaa;
+      --accent: #bb86fc;
+      --accent-hover: #3700b3;
+      --border-color: #333;
+      --normal-badge: #03dac6;
+      --furry-badge: #cf6679;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      min-height: 100vh;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       display: flex;
-      flex-direction: column;
+      min-height: 100vh;
     }
 
-    header {
+    /* Sidebar */
+    aside {
+      width: 280px;
+      background-color: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 28px;
-      background-color: #121218;
-      border-bottom: 1px solid var(--card-border);
+    }
+
+    .admin-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .admin-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .genre-filter {
+      display: flex;
+      padding: 10px 20px;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .genre-btn {
+      flex: 1;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .genre-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+
+    .sidebar-tags-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 20px;
+    }
+
+    .sidebar-tag-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-tag-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-color);
+    }
+
+    .sidebar-tag-item.active {
+      background: rgba(187, 134, 252, 0.15);
+      color: var(--accent);
+    }
+
+    /* Main Content */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-color);
       position: sticky;
       top: 0;
-      z-index: 100;
-    }
-
-    header h1 {
-      font-size: 1.4rem;
-      color: var(--accent);
-      letter-spacing: 0.5px;
-    }
-
-    .btn-admin {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btn-admin:hover { background: var(--accent-hover); }
-
-    .search-container {
-      display: flex;
-      gap: 12px;
-      padding: 16px 28px;
-      background: var(--bg-dark);
-      align-items: center;
+      z-index: 10;
     }
 
     .search-bar {
-      flex: 1;
-      padding: 11px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--card-border);
+      width: 400px;
       background: var(--card-bg);
-      color: var(--text-main);
-      font-size: 0.95rem;
-    }
-    .search-bar:focus { outline: none; border-color: var(--accent); }
-
-    .genre-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 9px 18px;
+      border: 1px solid var(--border-color);
       border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    .genre-btn.active { background: var(--accent); border-color: var(--accent); }
-
-    .main-wrapper {
-      display: flex;
-      flex: 1;
-      padding: 0 28px 28px 28px;
-      gap: 24px;
+      padding: 10px 15px;
+      color: var(--text-color);
+      font-size: 1rem;
     }
 
-    .content-area { flex: 1; }
+    .search-bar:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
 
     .stats-text {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      margin-bottom: 14px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
 
-    .grid {
+    .artist-grid {
+      padding: 20px;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 20px;
     }
 
+    /* Card */
     .card {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 18px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      cursor: pointer;
+      gap: 12px;
       transition: transform 0.2s, border-color 0.2s;
-      position: relative;
     }
+
     .card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       border-color: var(--accent);
     }
 
     .card-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
+      width: 100%;
+      height: 200px;
       object-fit: cover;
-      margin-bottom: 12px;
-      border: 2px solid var(--accent);
-      background-color: #222;
+      border-radius: 6px;
+      background: var(--bg-color);
     }
 
     .card h3 {
-      font-size: 1.15rem;
-      margin-bottom: 6px;
+      font-size: 1.1rem;
+      color: var(--text-color);
     }
 
     .badge {
-      font-size: 0.68rem;
+      align-self: flex-start;
       padding: 2px 8px;
-      border-radius: 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 12px;
+      font-weight: bold;
     }
-    .badge.normal { background: #1c2b38; color: #64b5f6; }
-    .badge.furry { background: #381c2b; color: #f06292; }
+
+    .badge.normal {
+      background: rgba(3, 218, 198, 0.15);
+      color: var(--normal-badge);
+    }
+
+    .badge.furry {
+      background: rgba(207, 102, 121, 0.15);
+      color: var(--furry-badge);
+    }
 
     .tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      margin-bottom: 16px;
+      gap: 5px;
     }
+
     .tag {
-      font-size: 0.72rem;
-      background: #22222e;
-      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      padding: 2px 6px;
       border-radius: 4px;
-      color: var(--text-sub);
+      font-size: 0.8rem;
     }
+
     .tag.more-count {
-      background: rgba(233, 30, 99, 0.15);
       color: var(--accent);
-      font-weight: 600;
+      background: rgba(187, 134, 252, 0.1);
     }
 
     .links-row {
       display: flex;
-      gap: 6px;
-      width: 100%;
+      gap: 10px;
       margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
     }
+
     .links-row a {
-      flex: 1;
+      color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 7px 4px;
-      border-radius: 6px;
-      background: #22222d;
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
+      font-size: 0.85rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: background 0.2s, border-color 0.2s;
+      gap: 4px;
     }
-    .links-row a img.favicon {
+
+    .links-row a:hover {
+      color: var(--accent);
+    }
+
+    .favicon {
       width: 14px;
       height: 14px;
-      border-radius: 2px;
-    }
-    .links-row a:hover {
-      background: #2d2d3d;
-      border-color: var(--accent);
+      object-fit: contain;
     }
 
-    .sidebar {
-      width: var(--sidebar-width);
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 18px;
-      height: fit-content;
-      position: sticky;
-      top: 80px;
-    }
-    .sidebar h2 {
-      font-size: 1rem;
-      margin-bottom: 12px;
-      color: var(--accent);
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 8px;
-    }
-    .sidebar-tags {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-    .sidebar-tag-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 10px;
-      border-radius: 6px;
-      background: #20202c;
-      font-size: 0.82rem;
-      color: var(--text-sub);
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .sidebar-tag-item:hover, .sidebar-tag-item.active {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .overlay {
+    /* Modal */
+    .modal-backdrop {
       position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
     }
 
     .modal {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 24px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 540px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 600px;
+      max-width: 90%;
       max-height: 90vh;
       overflow-y: auto;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .artist-modal-header {
+    .modal-header {
       display: flex;
-      gap: 16px;
+      justify-content: space-between;
       align-items: center;
     }
-    .artist-modal-header img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--accent);
+
+    .modal-header h2 {
+      font-size: 1.5rem;
     }
 
-    .full-tags-list {
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: var(--text-color);
+    }
+
+    .modal-samples {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .modal-sample-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--bg-color);
+    }
+
+    .modal-tags-list {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      max-height: 100px;
-      overflow-y: auto;
-      padding: 8px;
-      background: #121218;
-      border-radius: 6px;
-      border: 1px solid var(--card-border);
     }
-
-    .samples-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 8px;
-    }
-    .samples-grid img {
-      width: 100%;
-      height: auto;
-      max-height: 600px;
-      object-fit: contain;
-      border-radius: 6px;
-      border: 1px solid var(--card-border);
-      background-color: #000;
-    }
-
-    .admin-artist-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 120px;
-      overflow-y: auto;
-      background: #121218;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid var(--card-border);
-    }
-    .admin-artist-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 10px;
-      border-radius: 4px;
-      background: #1a1a24;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .admin-artist-item:hover {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .modal-btn {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      background: var(--accent);
-      color: white;
-    }
-    .modal-btn.secondary { background: #444; }
-    .modal-btn.danger { background: #c62828; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>NSFW Artist Directory</h1>
-    <button class="btn-admin" onclick="openAdminModal()">+ Add/Edit Artist</button>
-  </header>
-
-  <div class="search-container">
-    <input type="text" id="searchInput" class="search-bar" placeholder="Search artist or tag..." oninput="render()">
-    <button class="genre-btn active" onclick="filterGenre('all', this)">All</button>
-    <button class="genre-btn" onclick="filterGenre('normal', this)">Normal</button>
-    <button class="genre-btn" onclick="filterGenre('furry', this)">Furry</button>
-  </div>
-
-  <div class="main-wrapper">
-    <div class="content-area">
-      <div class="stats-text" id="statsText">Loading...</div>
-      <div class="grid" id="artistGrid"></div>
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-header">
+      <span>Artists</span>
+      <button class="admin-btn" onclick="openAdminModal()">Admin</button>
     </div>
-
-    <div class="sidebar">
-      <h2>Filter by Tag</h2>
-      <div class="sidebar-tag-item active" id="clearTagBtn" onclick="selectTagFilter('')">
-        <span>All Tags</span>
-      </div>
-      <div class="sidebar-tags" id="sidebarTags"></div>
+    <div class="genre-filter">
+      <button class="genre-btn active" onclick="filterGenre('all', this)">All</button>
+      <button class="genre-btn" onclick="filterGenre('normal', this)">Normal</button>
+      <button class="genre-btn" onclick="filterGenre('furry', this)">Furry</button>
     </div>
-  </div>
-
-  <!-- Artist Details Modal -->
-  <div class="overlay" id="artistModal">
-    <div class="modal">
-      <div class="artist-modal-header">
-        <img id="modalAvatar" referrerpolicy="no-referrer" src="" alt="" onerror="this.src='https://ui-avatars.com/api/?name=Artist&background=e91e63&color=fff'">
-        <div>
-          <h2 id="modalName"></h2>
-          <span id="modalBadge" class="badge"></span>
-          <div id="modalTwitterHandle" style="font-size:0.85rem; color:var(--text-sub);"></div>
-        </div>
-      </div>
-      <div>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">Featured Specialties:</p>
-        <div class="tags" id="modalFeaturedTags" style="justify-content: flex-start;"></div>
-      </div>
-      <div>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">All Indexed Tags:</p>
-        <div class="full-tags-list" id="modalAllTags"></div>
-      </div>
-      <div>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">Top Artwork Samples (via Danbooru):</p>
-        <div class="samples-grid" id="modalSamples"></div>
-      </div>
-      <div class="links-row" id="modalLinks"></div>
-      <button class="modal-btn secondary" onclick="closeModal('artistModal')">Close</button>
+    <div class="sidebar-tags-container" id="sidebarTags">
+      <!-- Populated dynamically -->
     </div>
-  </div>
+  </aside>
 
-  <!-- Admin Modal -->
-  <div class="overlay" id="adminModal">
-    <div class="modal">
-      <h2 id="adminTitle">Add or Edit Artist</h2>
-      
-      <p style="font-size: 0.8rem; color: var(--text-sub);">Click an artist to edit, or enter details below to add a new one:</p>
-      <div class="admin-artist-list" id="adminArtistList"></div>
+  <!-- Main View -->
+  <main>
+    <div class="top-bar">
+      <input type="text" id="searchInput" class="search-bar" placeholder="Search artists or tags..." oninput="render()">
+      <div class="stats-text" id="statsText">Showing 0 of 0 artists</div>
+    </div>
+    <div class="artist-grid" id="artistGrid">
+      <!-- Populated dynamically -->
+    </div>
+  </main>
 
-      <div id="adminStatus" style="font-size: 0.85rem; color: var(--accent);"></div>
-      <input type="text" id="inputName" class="search-bar" placeholder="Artist Danbooru Tag (e.g. brikot)">
-      <input type="text" id="inputTwitter" class="search-bar" placeholder="Twitter Handle (e.g. brikot_art)">
-      <input type="text" id="inputFeatured" class="search-bar" placeholder="Featured Tags (Comma separated: tits, thighs)">
-      
-      <button class="modal-btn" onclick="processAddOrEditArtist()">Auto-Fetch via Danbooru & Save</button>
-
-      <div style="display: flex; gap: 8px;">
-        <button class="modal-btn danger" style="flex: 1; display: none;" id="btnDelete" onclick="deleteCurrentArtist()">Delete Artist</button>
-        <button class="modal-btn secondary" style="flex: 1;" onclick="clearAdminForm()">Clear Form</button>
-      </div>
-
-      <button class="modal-btn" style="background:#2e7d32;" onclick="exportHtml()">📥 Export HTML to File</button>
-      <button class="modal-btn secondary" onclick="closeModal('adminModal')">Cancel</button>
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detailModalBackdrop" onclick="closeModalOnBackdrop(event)">
+    <div class="modal" id="detailModal">
+      <!-- Populated dynamically -->
     </div>
   </div>
 
@@ -486,7 +434,21 @@
         if (res.ok) {
           const posts = await res.json();
           if (Array.isArray(posts) && posts.length > 0) {
-            samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
+            samples = posts.map(p => {
+              // Explicitly check for full resolution sources first
+              if (p.file_url) {
+                return p.file_url;
+              }
+              if (p.large_file_url) {
+                return p.large_file_url;
+              }
+              // Fall back to the thumbnail preview only if high-res isn't available
+              if (p.preview_file_url) {
+                return p.preview_file_url;
+              }
+              return null;
+            }).filter(Boolean);
+
             posts.forEach(p => {
               if (p.tag_string) {
                 p.tag_string.split(' ').forEach(t => {
@@ -557,6 +519,13 @@
       const container = document.getElementById('sidebarTags');
       container.innerHTML = '';
 
+      const clearDiv = document.createElement('div');
+      clearDiv.className = `sidebar-tag-item ${selectedSidebarTag === '' ? 'active' : ''}`;
+      clearDiv.id = 'clearTagBtn';
+      clearDiv.onclick = () => selectTagFilter('');
+      clearDiv.innerHTML = `<span>All Tags</span><span>${db.length}</span>`;
+      container.appendChild(clearDiv);
+
       Object.keys(tagCounts)
         .sort((a, b) => tagCounts[b] - tagCounts[a])
         .slice(0, 50)
@@ -571,7 +540,6 @@
 
     function selectTagFilter(tag) {
       selectedSidebarTag = tag;
-      document.getElementById('clearTagBtn').className = `sidebar-tag-item ${tag === '' ? 'active' : ''}`;
       render();
     }
 
@@ -628,134 +596,159 @@
     }
 
     async function openArtistModal(artist) {
-      const avatarUrl = getAvatarUrl(artist);
-      const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
-      
-      const modalAvatar = document.getElementById('modalAvatar');
-      modalAvatar.src = avatarUrl;
-      modalAvatar.onerror = () => { modalAvatar.src = fallbackAvatar; };
+      const backdrop = document.getElementById('detailModalBackdrop');
+      const modal = document.getElementById('detailModal');
 
-      document.getElementById('modalName').innerText = artist.name;
-      document.getElementById('modalTwitterHandle').innerText = artist.twitterHandle ? `@${artist.twitterHandle}` : 'No Twitter handle set';
-      
-      const badge = document.getElementById('modalBadge');
-      badge.innerText = artist.genre;
-      badge.className = `badge ${artist.genre}`;
+      backdrop.classList.add('open');
 
-      document.getElementById('modalFeaturedTags').innerHTML = (artist.featuredTags || []).map(f => `<span class="tag">${f}</span>`).join('');
-      document.getElementById('modalAllTags').innerHTML = (artist.tags || []).map(f => `<span class="tag">${f}</span>`).join('');
-
-      const samplesDiv = document.getElementById('modalSamples');
+      let samplesHtml = '';
       if (artist.samples && artist.samples.length > 0) {
-        samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub);">Loading image previews...</p>';
-        
-        let imagesHtml = '';
-        for (let s of artist.samples) {
-          const safeUrl = await getBlobImageUrl(s);
-          imagesHtml += `<img referrerpolicy="no-referrer" src="${safeUrl}" alt="sample" onerror="this.outerHTML='<p style=\'font-size:0.8rem; color:var(--text-sub);\'>Preview failed to load</p>'">`;
-        }
-        samplesDiv.innerHTML = imagesHtml;
+        const resolvedSamples = await Promise.all(artist.samples.map(url => getBlobImageUrl(url)));
+        samplesHtml = resolvedSamples.map(sUrl => `<img class="modal-sample-img" referrerpolicy="no-referrer" src="${sUrl}" alt="sample">`).join('');
       } else {
-        samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub); grid-column:span 2;">No image previews returned from Danbooru for this tag.</p>';
+        samplesHtml = `<p style="color:var(--text-muted);">No samples available.</p>`;
       }
 
-      document.getElementById('modalLinks').innerHTML = buildLinksHtml(artist);
-      document.getElementById('artistModal').style.display = 'flex';
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h2>${artist.name}</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <span class="badge ${artist.genre}">${artist.genre}</span>
+        <div class="links-row">
+          ${buildLinksHtml(artist)}
+        </div>
+        <h3>Samples</h3>
+        <div class="modal-samples">
+          ${samplesHtml}
+        </div>
+        <h3>All Tags</h3>
+        <div class="modal-tags-list">
+          ${(artist.tags || []).map(t => `<span class="tag">#${t}</span>`).join('')}
+        </div>
+      `;
+    }
+
+    function closeModal() {
+      document.getElementById('detailModalBackdrop').classList.remove('open');
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === 'detailModalBackdrop') {
+        closeModal();
+      }
     }
 
     function openAdminModal() {
-      if (prompt("Enter Admin Password:") === ADMIN_PASS) {
-        populateAdminArtistList();
-        clearAdminForm();
-        document.getElementById('adminModal').style.display = 'flex';
+      const pass = prompt("Enter admin password:");
+      if (pass !== ADMIN_PASS) {
+        if (pass !== null) alert("Incorrect password!");
+        return;
+      }
+
+      const backdrop = document.getElementById('detailModalBackdrop');
+      const modal = document.getElementById('detailModal');
+      backdrop.classList.add('open');
+
+      const db = getDb();
+
+      let listHtml = db.map(a => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px; border-radius:6px; margin-bottom:8px;">
+          <span><strong>${a.name}</strong> (${a.genre})</span>
+          <div>
+            <button class="admin-btn" onclick="editArtistPrompt('${a.name}')">Edit</button>
+            <button class="admin-btn" style="color:var(--furry-badge); border-color:var(--furry-badge);" onclick="deleteArtist('${a.name}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h2>Admin Panel</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div>
+          <button class="genre-btn active" style="width:100%; padding:10px;" onclick="showAddArtistForm()">+ Add New Artist</button>
+        </div>
+        <hr style="border-color:var(--border-color);">
+        <h3>Manage Existing Artists</h3>
+        <div style="max-height:300px; overflow-y:auto;">
+          ${listHtml}
+        </div>
+      `;
+    }
+
+    function showAddArtistForm(editData = null) {
+      const modal = document.getElementById('detailModal');
+      const isEdit = editData !== null;
+      editingOriginalName = isEdit ? editData.name : null;
+
+      modal.innerHTML = `
+        <div class="modal-header">
+          <h2>${isEdit ? 'Edit Artist' : 'Add New Artist'}</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <label style="font-size:0.9rem; color:var(--text-muted);">Artist Name / Danbooru Tag</label>
+          <input type="text" id="adminArtistName" class="search-bar" style="width:100%;" value="${isEdit ? editData.name : ''}" placeholder="e.g. brikot">
+          
+          <label style="font-size:0.9rem; color:var(--text-muted);">Twitter Handle (optional)</label>
+          <input type="text" id="adminTwitter" class="search-bar" style="width:100%;" value="${isEdit ? (editData.twitterHandle || '') : ''}" placeholder="e.g. brikot_art">
+          
+          <label style="font-size:0.9rem; color:var(--text-muted);">Manual Featured Tags (comma-separated, optional)</label>
+          <input type="text" id="adminTags" class="search-bar" style="width:100%;" value="${isEdit ? (editData.featuredTags || []).join(', ') : ''}" placeholder="tits, thighs, creampie">
+          
+          <button class="genre-btn active" style="width:100%; padding:12px; margin-top:10px;" onclick="saveArtistFromAdmin()">Save & Fetch Data</button>
+        </div>
+      `;
+    }
+
+    function editArtistPrompt(name) {
+      const db = getDb();
+      const artist = db.find(a => a.name === name);
+      if (artist) {
+        showAddArtistForm(artist);
       }
     }
 
-    function populateAdminArtistList() {
-      const db = getDb();
-      const listDiv = document.getElementById('adminArtistList');
-      listDiv.innerHTML = '';
+    async function saveArtistFromAdmin() {
+      const nameInput = document.getElementById('adminArtistName').value.trim();
+      const twitterInput = document.getElementById('adminTwitter').value.trim();
+      const tagsInput = document.getElementById('adminTags').value.trim();
 
-      db.forEach(artist => {
-        const item = document.createElement('div');
-        item.className = 'admin-artist-item';
-        item.innerHTML = `<span><strong>${artist.name}</strong></span> <span>@${artist.twitterHandle || 'none'}</span>`;
-        item.onclick = () => loadArtistIntoAdminForm(artist);
-        listDiv.appendChild(item);
-      });
-    }
+      if (!nameInput) {
+        alert("Artist name cannot be blank.");
+        return;
+      }
 
-    function loadArtistIntoAdminForm(artist) {
-      editingOriginalName = artist.name;
-      document.getElementById('inputName').value = artist.name;
-      document.getElementById('inputTwitter').value = artist.twitterHandle || '';
-      document.getElementById('inputFeatured').value = (artist.featuredTags || []).join(', ');
-      document.getElementById('adminStatus').innerText = `Editing: ${artist.name}`;
-      document.getElementById('btnDelete').style.display = 'block';
-    }
+      alert("Fetching fresh data from Danbooru, please wait...");
 
-    function clearAdminForm() {
-      editingOriginalName = null;
-      document.getElementById('inputName').value = '';
-      document.getElementById('inputTwitter').value = '';
-      document.getElementById('inputFeatured').value = '';
-      document.getElementById('adminStatus').innerText = '';
-      document.getElementById('btnDelete').style.display = 'none';
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
-    }
-
-    async function processAddOrEditArtist() {
-      const name = document.getElementById('inputName').value.trim();
-      const twitter = document.getElementById('inputTwitter').value.trim();
-      const featured = document.getElementById('inputFeatured').value.trim();
-      const status = document.getElementById('adminStatus');
-
-      if (!name) return;
-      status.innerText = "Querying Danbooru API...";
-
-      const data = await fetchArtistData(name, twitter, featured);
+      const newData = await fetchArtistData(nameInput, twitterInput, tagsInput);
       let db = getDb();
 
       if (editingOriginalName) {
-        db = db.filter(a => a.name.toLowerCase() !== editingOriginalName.toLowerCase());
-      } else {
-        db = db.filter(a => a.name.toLowerCase() !== name.toLowerCase());
+        db = db.filter(a => a.name !== editingOriginalName);
+        editingOriginalName = null;
       }
 
-      db.unshift(data);
+      db = db.filter(a => a.name.toLowerCase() !== newData.name.toLowerCase());
+      db.push(newData);
+
       localStorage.setItem('artist_db', JSON.stringify(db));
-      
-      status.innerText = "Saved successfully!";
-      setTimeout(() => { 
-        closeModal('adminModal'); 
-        render(); 
-      }, 600);
+      closeModal();
+      render();
     }
 
-    function deleteCurrentArtist() {
-      if (!editingOriginalName) return;
-      if (confirm(`Are you sure you want to delete ${editingOriginalName}?`)) {
-        let db = getDb().filter(a => a.name.toLowerCase() !== editingOriginalName.toLowerCase());
-        localStorage.setItem('artist_db', JSON.stringify(db));
-        closeModal('adminModal');
-        render();
-      }
+    function deleteArtist(name) {
+      if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+      let db = getDb();
+      db = db.filter(a => a.name !== name);
+      localStorage.setItem('artist_db', JSON.stringify(db));
+      openAdminModal();
+      render();
     }
 
-    function exportHtml() {
-      const db = getDb();
-      let code = document.documentElement.outerHTML;
-      code = code.replace(/const defaultArtists = \[[\s\S]*?\];/, `const defaultArtists = ${JSON.stringify(db, null, 2)};`);
-      const blob = new Blob(["<!DOCTYPE html>\n" + code], { type: "text/html" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "index.html";
-      a.click();
-    }
-
+    // Initial render call on load
     render();
   </script>
 </body>
