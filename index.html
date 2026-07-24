@@ -1014,41 +1014,52 @@
       });
     }
 
-    async function renderGoonCorner() {
-      const grid = document.getElementById('goonGrid');
-      const stats = document.getElementById('goonStatsText');
+async function renderGoonCorner() {
+  const grid = document.getElementById('goonGrid');
+  const stats = document.getElementById('goonStatsText');
 
-      if (!grid) return;
+  if (!grid) return;
 
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading random Goon Corner images...</div>`;
+  grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading random Goon Corner images...</div>`;
 
-      try {
-        const res = await fetch('/api/goon-corner');
-        if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
-        
-        const accumulatedImages = await res.json();
+  try {
+    const res = await fetch('/api/goon-corner');
+    if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
+    
+    const accumulatedImages = await res.json();
 
-        if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
+    if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
 
-        if (accumulatedImages.length === 0) {
-          grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
-          return;
-        }
-
-        grid.innerHTML = accumulatedImages.map(item => `
-          <div class="goon-card">
-            <div class="goon-img-container img-zoom-container">
-              <img class="goon-img modal-sample-img" referrerpolicy="no-referrer" src="${item.imageUrl || item.url}" alt="${item.artistName}">
-            </div>
-            <div class="goon-footer">🎨 ${item.artistName}</div>
-          </div>
-        `).join('');
-
-      } catch (err) {
-        console.error("Error loading Goon Corner:", err);
-        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
-      }
+    if (accumulatedImages.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
+      return;
     }
+
+    // Render placeholders first so the user isn't stuck waiting for all 50 blobs to fetch sequentially
+    grid.innerHTML = accumulatedImages.map((item, index) => `
+      <div class="goon-card" id="goon-card-${index}">
+        <div class="goon-img-container img-zoom-container">
+          <img class="goon-img modal-sample-img" id="goon-img-${index}" src="" alt="${item.artistName}">
+        </div>
+        <div class="goon-footer">🎨 ${item.artistName}</div>
+      </div>
+    `).join('');
+
+    // Fetch blob URLs asynchronously for each card so it matches your modal logic
+    accumulatedImages.forEach(async (item, index) => {
+      const rawUrl = item.imageUrl || item.url;
+      const blobUrl = await getBlobImageUrl(rawUrl);
+      const imgElem = document.getElementById(`goon-img-${index}`);
+      if (imgElem) {
+        imgElem.src = blobUrl;
+      }
+    });
+
+  } catch (err) {
+    console.error("Error loading Goon Corner:", err);
+    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
+  }
+}
 
     async function openArtistModal(artist) {
       const backdrop = document.getElementById('detailModalBackdrop');
