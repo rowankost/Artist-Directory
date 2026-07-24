@@ -1,374 +1,748 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Directory</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --danger: #f43f5e;
-            --border: #334155;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artist Directory</title>
+  <style>
+    :root {
+      --bg-dark: #0f0f13;
+      --card-bg: #181820;
+      --card-border: #262633;
+      --accent: #e91e63;
+      --accent-hover: #ff2a73;
+      --text-main: #f0f0f8;
+      --text-sub: #9090a8;
+      --sidebar-width: 260px;
+    }
 
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 2rem;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        header {
-            max-width: 1200px;
-            margin: 0 auto 2rem auto;
-            text-align: center;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        h1 {
-            margin-bottom: 0.5rem;
-        }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 28px;
+      background-color: #121218;
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    header h1 {
+      font-size: 1.4rem;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
 
-        .form-card {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            align-end;
-        }
+    .btn-admin {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-admin:hover { background: var(--accent-hover); }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
+    .search-container {
+      display: flex;
+      gap: 12px;
+      padding: 16px 28px;
+      background: var(--bg-dark);
+      align-items: center;
+    }
 
-        label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 0.4rem;
-        }
+    .search-bar {
+      flex: 1;
+      padding: 11px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+    .search-bar:focus { outline: none; border-color: var(--accent); }
 
-        input, select {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            color: var(--text-color);
-            padding: 0.6rem;
-            border-radius: 4px;
-            font-size: 0.95rem;
-        }
+    .genre-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 9px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .genre-btn.active { background: var(--accent); border-color: var(--accent); }
 
-        button {
-            background-color: var(--accent);
-            color: #0f172a;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+    .main-wrapper {
+      display: flex;
+      flex: 1;
+      padding: 0 28px 28px 28px;
+      gap: 24px;
+    }
 
-        button:hover {
-            opacity: 0.9;
-        }
+    .content-area { flex: 1; }
 
-        .add-btn-wrapper {
-            display: flex;
-            align-items: flex-end;
-        }
+    .stats-text {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 14px;
+    }
 
-        .artist-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
 
-        .artist-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
 
-        .artist-card h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
+    .card-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid var(--accent);
+      background-color: #222;
+    }
 
-        .handle {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin: 0;
-        }
+    .card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 6px;
+    }
 
-        .genre {
-            font-size: 0.85rem;
-            color: var(--accent);
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+    .badge {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .badge.normal { background: #1c2b38; color: #64b5f6; }
+    .badge.furry { background: #381c2b; color: #f06292; }
 
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-        }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .tag {
+      font-size: 0.72rem;
+      background: #22222e;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-sub);
+    }
+    .tag.more-count {
+      background: rgba(233, 30, 99, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
 
-        .tag {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            padding: 0.2rem 0.5rem;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            color: var(--text-muted);
-        }
+    .links-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      margin-top: auto;
+    }
+    .links-row a {
+      flex: 1;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 7px 4px;
+      border-radius: 6px;
+      background: #22222d;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .links-row a img.favicon {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+    }
+    .links-row a:hover {
+      background: #2d2d3d;
+      border-color: var(--accent);
+    }
 
-        .sample-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      height: fit-content;
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar h2 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+    .sidebar-tags {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .sidebar-tag-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #20202c;
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .sidebar-tag-item:hover, .sidebar-tag-item.active {
+      background: var(--accent);
+      color: #fff;
+    }
 
-        .sample-grid img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 4px;
-            background-color: var(--bg-color);
-        }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
 
-        .no-samples {
-            color: var(--text-muted);
-            font-style: italic;
-            font-size: 0.85rem;
-        }
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
 
-        .delete-btn {
-            background-color: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 0.4rem;
-            margin-top: auto;
-            width: 100%;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .artist-modal-header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .artist-modal-header img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
+    }
 
-        .delete-btn:hover {
-            background-color: rgba(244, 63, 94, 0.1);
-            opacity: 1;
-        }
-    </style>
+    .full-tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 100px;
+      overflow-y: auto;
+      padding: 8px;
+      background: #121218;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+
+    .samples-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .samples-grid img {
+      width: 100%;
+      height: auto;
+      max-height: 600px;
+      object-fit: contain;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background-color: #000;
+    }
+
+    .admin-artist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      background: #121218;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+    .admin-artist-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 4px;
+      background: #1a1a24;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .admin-artist-item:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .modal-btn {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+    }
+    .modal-btn.secondary { background: #444; }
+    .modal-btn.danger { background: #c62828; }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>Artist Directory</h1>
-        <p>Multi-source index with integrated API fetch handling</p>
-    </header>
+  <header>
+    <h1>NSFW Artist Directory</h1>
+    <button class="btn-admin" onclick="openAdminModal()">+ Add/Edit Artist</button>
+  </header>
 
-    <div class="container">
-        <!-- Input Form Panel -->
-        <div class="form-card">
-            <div class="form-group">
-                <label for="input-name">Artist Name / Tag</label>
-                <input type="text" id="input-name" placeholder="e.g. brikot">
-            </div>
-            <div class="form-group">
-                <label for="input-handle">Twitter / Source Handle</label>
-                <input type="text" id="input-handle" placeholder="e.g. brikot_art">
-            </div>
-            <div class="form-group">
-                <label for="input-genre">Genre / Category</label>
-                <select id="input-genre">
-                    <option value="normal">Normal</option>
-                    <option value="alternative">Alternative</option>
-                    <option value="sketch">Sketch</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="input-tags">Tags (Comma separated)</label>
-                <input type="text" id="input-tags" placeholder="tits, thighs, solo">
-            </div>
-            <div class="add-btn-wrapper">
-                <button onclick="handleAddNewArtist()" id="submit-btn" style="width: 100%;">Add & Fetch</button>
-            </div>
-        </div>
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search artist or tag..." oninput="render()">
+    <button class="genre-btn active" onclick="filterGenre('all', this)">All</button>
+    <button class="genre-btn" onclick="filterGenre('normal', this)">Normal</button>
+    <button class="genre-btn" onclick="filterGenre('furry', this)">Furry</button>
+  </div>
 
-        <!-- Dynamic Grid Container -->
-        <div id="artist-grid" class="artist-grid"></div>
+  <div class="main-wrapper">
+    <div class="content-area">
+      <div class="stats-text" id="statsText">Loading...</div>
+      <div class="grid" id="artistGrid"></div>
     </div>
 
-    <script>
-        const STORAGE_KEY = "artist_directory_db_v1";
+    <div class="sidebar">
+      <h2>Filter by Tag</h2>
+      <div class="sidebar-tag-item active" id="clearTagBtn" onclick="selectTagFilter('')">
+        <span>All Tags</span>
+      </div>
+      <div class="sidebar-tags" id="sidebarTags"></div>
+    </div>
+  </div>
 
-        const defaultArtists = [
-            {
-                name: "Brikot",
-                twitterHandle: "brikot_art",
-                genre: "normal",
-                tags: ["tits", "thighs", "creampie", "sweat", "stockings"],
-                samples: []
-            }
-        ];
+  <!-- Artist Details Modal -->
+  <div class="overlay" id="artistModal">
+    <div class="modal">
+      <div class="artist-modal-header">
+        <img id="modalAvatar" referrerpolicy="no-referrer" src="" alt="" onerror="this.src='https://ui-avatars.com/api/?name=Artist&background=e91e63&color=fff'">
+        <div>
+          <h2 id="modalName"></h2>
+          <span id="modalBadge" class="badge"></span>
+          <div id="modalTwitterHandle" style="font-size:0.85rem; color:var(--text-sub);"></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">Featured Specialties:</p>
+        <div class="tags" id="modalFeaturedTags" style="justify-content: flex-start;"></div>
+      </div>
+      <div>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">All Indexed Tags:</p>
+        <div class="full-tags-list" id="modalAllTags"></div>
+      </div>
+      <div>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px;">Top Artwork Samples:</p>
+        <div class="samples-grid" id="modalSamples"></div>
+      </div>
+      <div class="links-row" id="modalLinks"></div>
+      <button class="modal-btn secondary" onclick="closeModal('artistModal')">Close</button>
+    </div>
+  </div>
 
-        function getDb() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (!data) {
-                saveDb(defaultArtists);
-                return [...defaultArtists];
-            }
-            try {
-                return JSON.parse(data);
-            } catch (e) {
-                console.error("Failed to parse storage, resetting database.", e);
-                saveDb(defaultArtists);
-                return [...defaultArtists];
-            }
-        }
+  <!-- Admin Modal -->
+  <div class="overlay" id="adminModal">
+    <div class="modal">
+      <h2 id="adminTitle">Add or Edit Artist</h2>
+      
+      <p style="font-size: 0.8rem; color: var(--text-sub);">Click an artist to edit, or enter details below to add a new one:</p>
+      <div class="admin-artist-list" id="adminArtistList"></div>
 
-        function saveDb(db) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-        }
+      <div id="adminStatus" style="font-size: 0.85rem; color: var(--accent);"></div>
+      <input type="text" id="inputName" class="search-bar" placeholder="Artist Target Tag (e.g. brikot)">
+      <input type="text" id="inputTwitter" class="search-bar" placeholder="Twitter Handle (e.g. brikot_art)">
+      <input type="text" id="inputFeatured" class="search-bar" placeholder="Featured Tags (Comma separated: tits, thighs)">
+      
+      <button class="modal-btn" onclick="processAddOrEditArtist()">Auto-Fetch via Proxy & Save</button>
 
-        async function fetchArtistData(artistName) {
-            const formattedTag = artistName.trim().toLowerCase().replace(/\s+/g, "_");
-            const targetUrl = `https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags=${encodeURIComponent(formattedTag)}`;
-            const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+      <div style="display: flex; gap: 8px;">
+        <button class="modal-btn danger" style="flex: 1; display: none;" id="btnDelete" onclick="deleteCurrentArtist()">Delete Artist</button>
+        <button class="modal-btn secondary" style="flex: 1;" onclick="clearAdminForm()">Clear Form</button>
+      </div>
 
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+      <button class="modal-btn" style="background:#2e7d32;" onclick="exportHtml()">📥 Export HTML to File</button>
+      <button class="modal-btn secondary" onclick="closeModal('adminModal')">Cancel</button>
+    </div>
+  </div>
 
-                const posts = await response.json();
-                
-                if (!Array.isArray(posts) || posts.length === 0) {
-                    console.warn(`No posts returned for artist: ${artistName}`);
-                    return [];
-                }
+  <script>
+    const ADMIN_PASS = "admin";
 
-                return posts
-                    .map(p => p.preview_file_url || p.file_url || p.large_file_url)
-                    .filter(Boolean);
-            } catch (error) {
-                console.error(`Failed to retrieve resources for ${artistName}:`, error);
-                return [];
-            }
-        }
+    const ICONS = {
+      twitter: "https://x.com/favicon.ico",
+      rule34: "https://rule34.xxx/favicon.ico",
+      e621: "https://e621.net/favicon.ico"
+    };
 
-        async function handleAddNewArtist() {
-            const nameInput = document.getElementById("input-name");
-            const handleInput = document.getElementById("input-handle");
-            const genreInput = document.getElementById("input-genre");
-            const tagsInput = document.getElementById("input-tags");
-            const submitBtn = document.getElementById("submit-btn");
+    const defaultArtists = [
+      {
+        name: "Brikot",
+        twitterHandle: "brikot_art",
+        genre: "normal",
+        featuredTags: ["tits", "thighs", "creampie"],
+        tags: ["tits", "thighs", "creampie", "sweat", "stockings", "female", "solo", "uncensored", "high_res", "smiling"],
+        samples: []
+      }
+    ];
 
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert("Please enter an artist name.");
-                return;
-            }
+    let currentGenre = 'all';
+    let selectedSidebarTag = '';
+    let editingOriginalName = null;
 
-            submitBtn.textContent = "Fetching API...";
-            submitBtn.disabled = true;
+    function getDb() {
+      const stored = localStorage.getItem('artist_db');
+      if (stored) return JSON.parse(stored);
+      localStorage.setItem('artist_db', JSON.stringify(defaultArtists));
+      return defaultArtists;
+    }
 
-            const db = getDb();
-            if (db.some(a => a.name.toLowerCase() === name.toLowerCase())) {
-                alert("Artist already exists in the directory.");
-                submitBtn.textContent = "Add & Fetch";
-                submitBtn.disabled = false;
-                return;
-            }
+    // Fetches artwork automatically via Rule34 API using the corsproxy.io client-side wrapper architecture
+    async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
+      let samples = [];
+      let allTagsSet = new Set();
+      let furryScore = 0;
 
-            const tags = tagsInput.value.split(",").map(t => t.trim()).filter(Boolean);
-            const samples = await fetchArtistData(name);
+      const cleanTag = artistName.toLowerCase().trim().replace(/\s+/g, "_");
 
-            const newArtist = {
-                name,
-                twitterHandle: handleInput.value.trim(),
-                genre: genreInput.value,
-                tags,
-                samples
-            };
+      try {
+        const targetUrl = `https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags=${encodeURIComponent(cleanTag)}&limit=4`;
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
 
-            db.unshift(newArtist);
-            saveDb(db);
-            renderDirectory();
-
-            // Reset inputs
-            nameInput.value = "";
-            handleInput.value = "";
-            tagsInput.value = "";
-            submitBtn.textContent = "Add & Fetch";
-            submitBtn.disabled = false;
-        }
-
-        function removeArtist(index) {
-            const db = getDb();
-            db.splice(index, 1);
-            saveDb(db);
-            renderDirectory();
-        }
-
-        function renderDirectory() {
-            const db = getDb();
-            const container = document.getElementById("artist-grid");
-            
-            if (!container) return;
-            container.innerHTML = "";
-
-            db.forEach((artist, index) => {
-                const card = document.createElement("div");
-                card.className = "artist-card";
-
-                let samplesHtml = "";
-                if (artist.samples && artist.samples.length > 0) {
-                    samplesHtml = `<div class="sample-grid">
-                        ${artist.samples.slice(0, 4).map(url => `<img src="${url}" alt="Sample artwork" loading="lazy" />`).join("")}
-                    </div>`;
-                } else {
-                    samplesHtml = `<p class="no-samples">No image samples available or failed to load.</p>`;
-                }
-
-                card.innerHTML = `
-                    <h3>${artist.name}</h3>
-                    <p class="handle">@${artist.twitterHandle || "N/A"}</p>
-                    <p class="genre">Genre: ${artist.genre}</p>
-                    <div class="tags">
-                        ${artist.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
-                    </div>
-                    ${samplesHtml}
-                    <button onclick="removeArtist(${index})" class="delete-btn">Remove Artist</button>
-                `;
-
-                container.appendChild(card);
+        const res = await fetch(proxyUrl);
+        
+        if (res.ok) {
+          const posts = await res.json();
+          if (Array.isArray(posts) && posts.length > 0) {
+            samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
+            posts.forEach(p => {
+              let tagString = p.tags;
+              if (typeof tagString === 'string') {
+                tagString.split(' ').forEach(t => {
+                  if (t) {
+                    allTagsSet.add(t);
+                    if (['furry', 'anthro', 'scalie', 'feral'].includes(t)) furryScore++;
+                  }
+                });
+              }
             });
+          }
         }
+      } catch (e) {
+        console.warn("CORS proxy fetch warning:", e);
+      }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderDirectory();
+      const allTagsArray = Array.from(allTagsSet);
+      let featured = manualFeaturedTags
+        ? manualFeaturedTags.split(",").map(t => t.trim().toLowerCase()).filter(Boolean)
+        : allTagsArray.slice(0, 3);
+
+      return {
+        name: artistName,
+        twitterHandle: (twitterHandle || '').replace('@', '').trim(),
+        genre: furryScore >= 1 ? "furry" : "normal",
+        featuredTags: featured,
+        tags: allTagsArray.length > 0 ? allTagsArray : featured,
+        samples: samples
+      };
+    }
+
+    function buildLinksHtml(artist) {
+      const twitterHandle = artist.twitterHandle;
+      const twitterUrl = twitterHandle 
+        ? `https://x.com/${twitterHandle}`
+        : `https://x.com/search?q=${encodeURIComponent(artist.name)}`;
+
+      const r34Url = `https://rule34.xxx/index.php?page=post&s=list&tags=${encodeURIComponent(artist.name.toLowerCase())}`;
+      const e621Url = `https://e621.net/posts?tags=${encodeURIComponent(artist.name.toLowerCase())}`;
+
+      const twitterBtn = `<a href="${twitterUrl}" target="_blank" onclick="event.stopPropagation()"><img src="${ICONS.twitter}" class="favicon" onerror="this.style.display='none'"> Twitter</a>`;
+      const r34Btn = `<a href="${r34Url}" target="_blank" onclick="event.stopPropagation()"><img src="${ICONS.rule34}" class="favicon" onerror="this.style.display='none'"> Rule34</a>`;
+      const e621Btn = `<a href="${e621Url}" target="_blank" onclick="event.stopPropagation()"><img src="${ICONS.e621}" class="favicon" onerror="this.style.display='none'"> e621</a>`;
+
+      if (artist.genre === 'furry') {
+        return `${twitterBtn}${e621Btn}${r34Btn}`;
+      } else {
+        return `${twitterBtn}${r34Btn}${e621Btn}`;
+      }
+    }
+
+    function getAvatarUrl(artist) {
+      if (artist.twitterHandle) {
+        return `https://unavatar.io/x/${artist.twitterHandle}`;
+      }
+      if (artist.samples && artist.samples.length > 0) {
+        return artist.samples[0];
+      }
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+    }
+
+    function renderSidebarTags(db) {
+      const tagCounts = {};
+      db.forEach(a => {
+        (a.tags || []).forEach(f => {
+          tagCounts[f] = (tagCounts[f] || 0) + 1;
         });
-    </script>
+      });
+
+      const container = document.getElementById('sidebarTags');
+      container.innerHTML = '';
+
+      Object.keys(tagCounts)
+        .sort((a, b) => tagCounts[b] - tagCounts[a])
+        .slice(0, 50)
+        .forEach(tag => {
+          const div = document.createElement('div');
+          div.className = `sidebar-tag-item ${selectedSidebarTag === tag ? 'active' : ''}`;
+          div.onclick = () => selectTagFilter(tag);
+          div.innerHTML = `<span>#${tag}</span><span>${tagCounts[tag]}</span>`;
+          container.appendChild(div);
+        });
+    }
+
+    function selectTagFilter(tag) {
+      selectedSidebarTag = tag;
+      document.getElementById('clearTagBtn').className = `sidebar-tag-item ${tag === '' ? 'active' : ''}`;
+      render();
+    }
+
+    function filterGenre(genre, btn) {
+      currentGenre = genre;
+      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function render() {
+      const db = getDb();
+      renderSidebarTags(db);
+
+      const grid = document.getElementById('artistGrid');
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const filtered = db.filter(a => {
+        const matchGenre = currentGenre === 'all' || a.genre === currentGenre;
+        const matchTag = selectedSidebarTag === '' || (a.tags && a.tags.includes(selectedSidebarTag));
+        const matchSearch = a.name.toLowerCase().includes(search) || 
+                            (a.tags && a.tags.some(f => f.toLowerCase().includes(search)));
+        return matchGenre && matchTag && matchSearch;
+      });
+
+      document.getElementById('statsText').innerText = `Showing ${filtered.length} of ${db.length} artists`;
+      grid.innerHTML = '';
+
+      filtered.forEach(artist => {
+        const extraTagsCount = (artist.tags || []).length - (artist.featuredTags || []).length;
+        const avatarUrl = getAvatarUrl(artist);
+        const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = (e) => {
+          if (e.target.tagName !== 'A' && !e.target.closest('a')) openArtistModal(artist);
+        };
+
+        card.innerHTML = `
+          <img class="card-avatar" referrerpolicy="no-referrer" src="${avatarUrl}" alt="${artist.name}" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+          <h3>${artist.name}</h3>
+          <span class="badge ${artist.genre}">${artist.genre}</span>
+          <div class="tags">
+            ${(artist.featuredTags || []).map(f => `<span class="tag">${f}</span>`).join('')}
+            ${extraTagsCount > 0 ? `<span class="tag more-count">+${extraTagsCount}</span>` : ''}
+          </div>
+          <div class="links-row">
+            ${buildLinksHtml(artist)}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function openArtistModal(artist) {
+      const avatarUrl = getAvatarUrl(artist);
+      const fallbackAvatar = (artist.samples && artist.samples.length > 0) ? artist.samples[0] : `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=e91e63&color=fff`;
+      
+      const modalAvatar = document.getElementById('modalAvatar');
+      modalAvatar.src = avatarUrl;
+      modalAvatar.onerror = () => { modalAvatar.src = fallbackAvatar; };
+
+      document.getElementById('modalName').innerText = artist.name;
+      document.getElementById('modalTwitterHandle').innerText = artist.twitterHandle ? `@${artist.twitterHandle}` : 'No Twitter handle set';
+      
+      const badge = document.getElementById('modalBadge');
+      badge.innerText = artist.genre;
+      badge.className = `badge ${artist.genre}`;
+
+      document.getElementById('modalFeaturedTags').innerHTML = (artist.featuredTags || []).map(f => `<span class="tag">${f}</span>`).join('');
+      document.getElementById('modalAllTags').innerHTML = (artist.tags || []).map(f => `<span class="tag">${f}</span>`).join('');
+
+      const samplesDiv = document.getElementById('modalSamples');
+      if (artist.samples && artist.samples.length > 0) {
+        samplesDiv.innerHTML = artist.samples.map(s => `<img referrerpolicy="no-referrer" src="${s}" alt="sample" onerror="this.style.display='none'">`).join('');
+      } else {
+        samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub);">No image previews available via proxy for this tag.</p>';
+      }
+
+      document.getElementById('modalLinks').innerHTML = buildLinksHtml(artist);
+      document.getElementById('artistModal').style.display = 'flex';
+    }
+
+    function openAdminModal() {
+      if (prompt("Enter Admin Password:") === ADMIN_PASS) {
+        populateAdminArtistList();
+        clearAdminForm();
+        document.getElementById('adminModal').style.display = 'flex';
+      }
+    }
+
+    function populateAdminArtistList() {
+      const db = getDb();
+      const listDiv = document.getElementById('adminArtistList');
+      listDiv.innerHTML = '';
+
+      db.forEach(artist => {
+        const item = document.createElement('div');
+        item.className = 'admin-artist-item';
+        item.innerHTML = `<span><strong>${artist.name}</strong></span> <span>@${artist.twitterHandle || 'none'}</span>`;
+        item.onclick = () => loadArtistIntoAdminForm(artist);
+        listDiv.appendChild(item);
+      });
+    }
+
+    function loadArtistIntoAdminForm(artist) {
+      editingOriginalName = artist.name;
+      document.getElementById('inputName').value = artist.name;
+      document.getElementById('inputTwitter').value = artist.twitterHandle || '';
+      document.getElementById('inputFeatured').value = (artist.featuredTags || []).join(', ');
+      document.getElementById('adminStatus').innerText = `Editing: ${artist.name}`;
+      document.getElementById('btnDelete').style.display = 'block';
+    }
+
+    function clearAdminForm() {
+      editingOriginalName = null;
+      document.getElementById('inputName').value = '';
+      document.getElementById('inputTwitter').value = '';
+      document.getElementById('inputFeatured').value = '';
+      document.getElementById('adminStatus').innerText = '';
+      document.getElementById('btnDelete').style.display = 'none';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    async function processAddOrEditArtist() {
+      const name = document.getElementById('inputName').value.trim();
+      const twitter = document.getElementById('inputTwitter').value.trim();
+      const featured = document.getElementById('inputFeatured').value.trim();
+      const status = document.getElementById('adminStatus');
+
+      if (!name) return;
+      status.innerText = "Querying via CORS proxy layer...";
+
+      const data = await fetchArtistData(name, twitter, featured);
+      let db = getDb();
+
+      if (editingOriginalName) {
+        db = db.filter(a => a.name.toLowerCase() !== editingOriginalName.toLowerCase());
+      } else {
+        db = db.filter(a => a.name.toLowerCase() !== name.toLowerCase());
+      }
+
+      db.unshift(data);
+      localStorage.setItem('artist_db', JSON.stringify(db));
+      
+      status.innerText = "Saved successfully!";
+      setTimeout(() => { 
+        closeModal('adminModal'); 
+        render(); 
+      }, 600);
+    }
+
+    function deleteCurrentArtist() {
+      if (!editingOriginalName) return;
+      if (confirm(`Are you sure you want to delete ${editingOriginalName}?`)) {
+        let db = getDb().filter(a => a.name.toLowerCase() !== editingOriginalName.toLowerCase());
+        localStorage.setItem('artist_db', JSON.stringify(db));
+        closeModal('adminModal');
+        render();
+      }
+    }
+
+    function exportHtml() {
+      const db = getDb();
+      let code = document.documentElement.outerHTML;
+      code = code.replace(/const defaultArtists = \[[\s\S]*?\];/, `const defaultArtists = ${JSON.stringify(db, null, 2)};`);
+      const blob = new Blob(["<!DOCTYPE html>\n" + code], { type: "text/html" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "index.html";
+      a.click();
+    }
+
+    render();
+  </script>
 </body>
 </html>
