@@ -300,9 +300,9 @@
     }
     .samples-grid img {
       width: 100%;
-      height: auto; /* Preserves the native aspect ratio */
-      max-height: 600px; /* Gives large vertical space for high-res art */
-      object-fit: contain; /* Ensures no part of the artwork is cropped out */
+      height: auto;
+      max-height: 600px;
+      object-fit: contain;
       border-radius: 6px;
       border: 1px solid var(--card-border);
       background-color: #000;
@@ -459,13 +459,11 @@
       return defaultArtists;
     }
 
-    // Fetches artwork automatically via Danbooru API (strictly lowercase tag string, limited to 4 images)
     async function fetchArtistData(artistName, twitterHandle, manualFeaturedTags) {
       let samples = [];
       let allTagsSet = new Set();
       let furryScore = 0;
 
-      // Force lowercase to match Danbooru API requirements
       const cleanTag = artistName.toLowerCase().trim();
 
       try {
@@ -475,7 +473,7 @@
         if (res.ok) {
           const posts = await res.json();
           if (Array.isArray(posts) && posts.length > 0) {
-          samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
+            samples = posts.map(p => p.preview_file_url || p.file_url || p.large_file_url).filter(Boolean);
             posts.forEach(p => {
               if (p.tag_string) {
                 p.tag_string.split(' ').forEach(t => {
@@ -636,7 +634,9 @@
 
       const samplesDiv = document.getElementById('modalSamples');
       if (artist.samples && artist.samples.length > 0) {
-        samplesDiv.innerHTML = artist.samples.map(s => `<img referrerpolicy="no-referrer" src="${s}" alt="sample" onerror="this.style.display='none'">`).join('');
+        samplesDiv.innerHTML = artist.samples.map(s => `
+          <img referrerpolicy="no-referrer" src="${s}" alt="sample" onerror="this.outerHTML='<p style=\'font-size:0.8rem; color:var(--text-sub);\'>Preview failed to load</p>'">
+        `).join('');
       } else {
         samplesDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-sub); grid-column:span 2;">No image previews returned from Danbooru for this tag.</p>';
       }
