@@ -200,8 +200,9 @@
       overflow: visible;
     }
 
-    /* Full-Screen Hover Zoom System */
-    .img-zoom-container {
+    /* Full-Screen Hover Zoom System & Updated Container Fixes */
+    .img-zoom-container, .zoom-container {
+      overflow: visible !important; /* Prevent clipping if the image expands past bounds */
       position: relative;
       width: 100%;
       height: 180px;
@@ -209,13 +210,14 @@
       background: var(--bg-color);
     }
 
-    .modal-sample-img {
+    .modal-sample-img, .zoom-container img.zoomed {
+      transform-origin: center center;
+      max-width: none; /* Allow the image to break out of standard restriction if needed */
+      max-height: none;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 6px;
-      transition: none;
+      height: auto;
       cursor: zoom-in;
+      border-radius: 6px;
     }
 
     /* Goon Corner Hover Overrides for Full-Screen View */
@@ -862,6 +864,27 @@
       }
     }
 
+    // Integrated Two-Step Danbooru Randomization Helper
+    async function getRandomDanbooruPost(artistTag) {
+        const randomPage = Math.floor(Math.random() * 50) + 1;
+        
+        try {
+            const response = await fetch(`https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent(artistTag)}&page=${randomPage}&limit=20`);
+            const posts = await response.json();
+            
+            if (!posts || posts.length === 0) {
+                console.warn("No posts found on this page/tag combination.");
+                return null;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * posts.length);
+            return posts[randomIndex];
+        } catch (err) {
+            console.error("Error fetching random Danbooru post:", err);
+            return null;
+        }
+    }
+
     function isRestrictedArtist(artist) {
       const genre = (artist.genre || '').toLowerCase();
       const tags = artist.tags || [];
@@ -1038,7 +1061,6 @@
       const db = await getDb();
       let accumulatedImages = [];
 
-      // Loop through every artist on the site and extract random pages/samples
       db.forEach(artist => {
         if (!secretUnlocked && isRestrictedArtist(artist)) return;
 
@@ -1046,9 +1068,8 @@
         const hasTag = tags.some(t => t.toLowerCase().includes(query));
 
         if (hasTag && artist.samples && artist.samples.length > 0) {
-          // Shuffle the artist's full sample pool to pick completely random posts across different pages/indexes
           const randomizedPool = [...artist.samples].sort(() => Math.random() - 0.5);
-          const chosenSamples = randomizedPool.slice(0, 3); // Pick 3 random images per matching artist
+          const chosenSamples = randomizedPool.slice(0, 3);
 
           chosenSamples.forEach(imgUrl => {
             accumulatedImages.push({
@@ -1059,7 +1080,6 @@
         }
       });
 
-      // Final shuffle of the entire massive collection for high variety randomness
       accumulatedImages.sort(() => Math.random() - 0.5);
 
       if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
@@ -1089,8 +1109,8 @@
       if (artist.samples && artist.samples.length > 0) {
         const resolvedSamples = await Promise.all(artist.samples.map(url => getBlobImageUrl(url)));
         samplesHtml = resolvedSamples.map(sUrl => `
-          <div class="img-zoom-container">
-            <img class="modal-sample-img" referrerpolicy="no-referrer" src="${sUrl}" alt="sample">
+          <div class="zoom-container">
+            <img class="modal-sample-img zoomed" referrerpolicy="no-referrer" src="${sUrl}" alt="sample">
           </div>
         `).join('');
       } else {
