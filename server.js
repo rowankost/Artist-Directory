@@ -124,7 +124,50 @@ app.delete('/api/artists/:name', async (req, res) => {
   }
 });
 
-// FIX 2: Explicitly catch all homepage route visits and serve the HTML file
+// --- Dedicated endpoint for Goon Corner ---
+app.get('/api/goon-corner', async (req, res) => {
+  try {
+    const artists = await Artist.find({});
+
+    const goonCornerImages = await Promise.all(
+      artists.map(async (artist) => {
+        const formattedTag = artist.name.toLowerCase().trim().replace(/\s+/g, '_');
+        const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodeURIComponent('artist:' + formattedTag + ' order:random')}&limit=1`;
+        
+        try {
+          const response = await fetch(danbooruUrl);
+          if (response.ok) {
+            const posts = await response.json();
+            if (Array.isArray(posts) && posts.length > 0) {
+              let p = posts[0];
+              let rawUrl = p.file_url || p.large_file_url || p.preview_file_url;
+              if (rawUrl) {
+                if (rawUrl.includes('cdn.donmai.us')) {
+                  rawUrl = rawUrl.replace(/\/180x180\/|\/sample\//g, '/');
+                }
+                return {
+                  artistName: artist.name,
+                  imageUrl: rawUrl,
+                  postId: p.id
+                };
+              }
+            }
+          }
+        } catch (fetchErr) {
+          console.error(`Failed to fetch random image for ${artist.name}:`, fetchErr);
+        }
+        return null;
+      })
+    );
+
+    res.json(goonCornerImages.filter(item => item !== null));
+  } catch (err) {
+    console.error('Error fetching goon corner images:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Explicitly catch all homepage route visits and serve the HTML file
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
