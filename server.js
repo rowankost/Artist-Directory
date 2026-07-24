@@ -5,9 +5,11 @@ const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect to MongoDB (Replace with your own free MongoDB Atlas connection string, or local URI)
+// FIX 1: Look in the root folder instead of a 'public' folder
+app.use(express.static(__dirname));
+
+// Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rowankost_db_user:nMUEnmKUXTq7dmYg@artist-directory.muafcbh.mongodb.net/?appName=artist-directory';
 mongoose.connect(MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
@@ -122,6 +124,11 @@ app.delete('/api/artists/:name', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// FIX 2: Explicitly catch all homepage route visits and serve the HTML file
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
