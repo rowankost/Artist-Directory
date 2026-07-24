@@ -323,7 +323,7 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 15px;
-      overflow: visible; /* Allows zoomed elements to break out cleanly */
+      overflow: visible;
     }
 
     /* True Floating Hover Zoom */
@@ -344,7 +344,6 @@
       cursor: zoom-in;
     }
 
-    /* When hovered, it scales up smoothly out of its container bounds with a high layer index and shadow */
     .img-zoom-container:hover .modal-sample-img {
       transform: scale(1.7);
       object-fit: contain;
@@ -413,27 +412,48 @@
       e621: "https://e621.net/favicon.ico"
     };
 
-    const defaultArtists = [
-      {
-        name: "Brikot",
-        twitterHandle: "brikot_art",
-        genre: "normal",
-        featuredTags: ["tits", "thighs", "creampie"],
-        tags: ["tits", "thighs", "creampie", "sweat", "stockings", "female", "solo", "uncensored", "high_res", "smiling"],
-        samples: []
-      }
-    ];
-
     let currentGenre = 'all';
     let selectedSidebarTag = '';
     let editingOriginalName = null;
 
-    function getDb() {
-      const stored = localStorage.getItem('artist_db');
-      if (stored) return JSON.parse(stored);
-      localStorage.setItem('artist_db', JSON.stringify(defaultArtists));
-      return defaultArtists;
+    // --- Server API Fetch Functions ---
+    async function getDb() {
+      try {
+        const res = await fetch('/api/artists');
+        if (!res.ok) throw new Error("Failed to fetch artists");
+        return await res.json();
+      } catch (err) {
+        console.error("Error loading database:", err);
+        return [];
+      }
     }
+
+    async function saveArtistToServer(artistData) {
+      try {
+        const res = await fetch('/api/artists', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(artistData)
+        });
+        if (!res.ok) throw new Error("Failed to save artist");
+        return await res.json();
+      } catch (err) {
+        console.error("Error saving artist:", err);
+      }
+    }
+
+    async function deleteArtistFromServer(name) {
+      try {
+        const res = await fetch(`/api/artists/${encodeURIComponent(name)}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) throw new Error("Failed to delete artist");
+        return await res.json();
+      } catch (err) {
+        console.error("Error deleting artist:", err);
+      }
+    }
+    // ----------------------------------
 
     async function getBlobImageUrl(url) {
       if (!url) return '';
@@ -573,8 +593,8 @@
       render();
     }
 
-    function render() {
-      const db = getDb();
+    async function render() {
+      const db = await getDb();
       renderSidebarTags(db);
 
       const grid = document.getElementById('artistGrid');
@@ -666,7 +686,7 @@
       }
     }
 
-    function openAdminModal() {
+    async function openAdminModal() {
       const pass = prompt("Enter admin password:");
       if (pass !== ADMIN_PASS) {
         if (pass !== null) alert("Incorrect password!");
@@ -677,7 +697,7 @@
       const modal = document.getElementById('detailModal');
       backdrop.classList.add('open');
 
-      const db = getDb();
+      const db = await getDb();
 
       let listHtml = db.map(a => `
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px; border-radius:6px; margin-bottom:8px;">
@@ -730,8 +750,8 @@
       `;
     }
 
-    function editArtistPrompt(name) {
-      const db = getDb();
+    async function editArtistPrompt(name) {
+      const db = await getDb();
       const artist = db.find(a => a.name === name);
       if (artist) {
         showAddArtistForm(artist);
@@ -751,26 +771,21 @@
       alert("Fetching fresh data from Danbooru, please wait...");
 
       const newData = await fetchArtistData(nameInput, twitterInput, tagsInput);
-      let db = getDb();
 
-      if (editingOriginalName) {
-        db = db.filter(a => a.name !== editingOriginalName);
-        editingOriginalName = null;
+      if (editingOriginalName && editingOriginalName !== newData.name) {
+        await deleteArtistFromServer(editingOriginalName);
       }
+      editingOriginalName = null;
 
-      db = db.filter(a => a.name.toLowerCase() !== newData.name.toLowerCase());
-      db.push(newData);
+      await saveArtistToServer(newData);
 
-      localStorage.setItem('artist_db', JSON.stringify(db));
       closeModal();
       render();
     }
 
-    function deleteArtist(name) {
+    async function deleteArtist(name) {
       if (!confirm(`Are you sure you want to delete ${name}?`)) return;
-      let db = getDb();
-      db = db.filter(a => a.name !== name);
-      localStorage.setItem('artist_db', JSON.stringify(db));
+      await deleteArtistFromServer(name);
       openAdminModal();
       render();
     }
