@@ -489,21 +489,24 @@
       padding: 25px;
     }
 
-    /* Goon Corner Grid Layout */
+    /* Goon Corner Grid Layout - Expanded for large viewing */
     .goon-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 15px;
-      padding: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+      gap: 30px;
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .goon-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
@@ -515,8 +518,11 @@
     .goon-img-container {
       position: relative;
       width: 100%;
-      height: 220px;
+      height: 600px;
       background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .goon-img {
@@ -526,9 +532,9 @@
     }
 
     .goon-footer {
-      padding: 8px 10px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-color);
       background: rgba(0,0,0,0.3);
       white-space: nowrap;
       overflow: hidden;
@@ -1014,52 +1020,69 @@
       });
     }
 
-async function renderGoonCorner() {
-  const grid = document.getElementById('goonGrid');
-  const stats = document.getElementById('goonStatsText');
+    async function renderGoonCorner() {
+      const grid = document.getElementById('goonGrid');
+      const stats = document.getElementById('goonStatsText');
 
-  if (!grid) return;
+      if (!grid) return;
 
-  grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading random Goon Corner images...</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading Goon Corner pool...</div>`;
 
-  try {
-    const res = await fetch('/api/goon-corner');
-    if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
-    
-    const accumulatedImages = await res.json();
+      try {
+        const res = await fetch('/api/goon-corner');
+        if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
+        
+        const accumulatedImages = await res.json();
 
-    if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
+        if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
 
-    if (accumulatedImages.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
-      return;
-    }
+        if (accumulatedImages.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
+          return;
+        }
 
-    // Render placeholders first so the user isn't stuck waiting for all 50 blobs to fetch sequentially
-    grid.innerHTML = accumulatedImages.map((item, index) => `
-      <div class="goon-card" id="goon-card-${index}">
-        <div class="goon-img-container img-zoom-container">
-          <img class="goon-img modal-sample-img" id="goon-img-${index}" src="" alt="${item.artistName}">
-        </div>
-        <div class="goon-footer">🎨 ${item.artistName}</div>
-      </div>
-    `).join('');
+        // Render structure with data-src attributes for lazy loading
+        grid.innerHTML = accumulatedImages.map((item, index) => `
+          <div class="goon-card" id="goon-card-${index}">
+            <div class="goon-img-container img-zoom-container">
+              <img class="goon-img modal-sample-img lazy-goon-img" id="goon-img-${index}" data-src="${item.imageUrl || item.url}" src="" alt="${item.artistName}">
+            </div>
+            <div class="goon-footer">🎨 ${item.artistName}</div>
+          </div>
+        `).join('');
 
-    // Fetch blob URLs asynchronously for each card so it matches your modal logic
-    accumulatedImages.forEach(async (item, index) => {
-      const rawUrl = item.imageUrl || item.url;
-      const blobUrl = await getBlobImageUrl(rawUrl);
-      const imgElem = document.getElementById(`goon-img-${index}`);
-      if (imgElem) {
-        imgElem.src = blobUrl;
+        // Setup Intersection Observer to lazy load images as they scroll into view (~10 active on screen)
+        const observerOptions = {
+          root: null, // uses viewport
+          rootMargin: '300px', // triggers slightly before they scroll into view
+          threshold: 0.01
+        };
+
+        const observer = new IntersectionObserver((entries, observerInstance) => {
+          entries.forEach(async (entry) => {
+            if (entry.isIntersecting) {
+              const imgElem = entry.target;
+              observerInstance.unobserve(imgElem); // Stop observing once triggered
+
+              const rawUrl = imgElem.getAttribute('data-src');
+              if (rawUrl && !imgElem.src) {
+                const blobUrl = await getBlobImageUrl(rawUrl);
+                imgElem.src = blobUrl;
+              }
+            }
+          });
+        }, observerOptions);
+
+        // Observe all lazy goon images
+        document.querySelectorAll('.lazy-goon-img').forEach(img => {
+          observer.observe(img);
+        });
+
+      } catch (err) {
+        console.error("Error loading Goon Corner:", err);
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
       }
-    });
-
-  } catch (err) {
-    console.error("Error loading Goon Corner:", err);
-    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
-  }
-}
+    }
 
     async function openArtistModal(artist) {
       const backdrop = document.getElementById('detailModalBackdrop');
