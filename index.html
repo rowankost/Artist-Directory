@@ -514,41 +514,42 @@
       z-index: 50;
     }
 
-    .goon-img-container {
-      position: relative;
-      width: 100%;
-      height: 660px;
-      background: var(--bg-color);
-    }
-    
-    .goon-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      border-radius: 8px 8px 0 0;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
+.goon-img-container {
+  position: relative;
+  width: 100%;
+  height: 660px;
+  background: var(--bg-color);
+}
 
-    /* Hover effect: Fixed true-center alignment and prevents jitter/flashing */
-    .goon-img:hover {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: auto;
-      height: auto;
-      max-width: 85vw;
-      max-height: 85vh;
-      object-fit: contain;
-      z-index: 9999;
-      box-shadow: 0 0 50px rgba(0,0,0,0.9);
-      background: rgba(0, 0, 0, 0.95);
-      padding: 15px;
-      border-radius: 8px;
-      pointer-events: none;
-    }
+.goon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Hover trigger moved to the container, which never itself moves,
+   so the cursor never "loses" the hover target */
+.goon-img-container:hover .goon-img {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  height: auto;
+  max-width: 85vw;
+  max-height: 85vh;
+  object-fit: contain;
+  z-index: 9999;
+  box-shadow: 0 0 50px rgba(0,0,0,0.9);
+  background: rgba(0, 0, 0, 0.95);
+  padding: 15px;
+  border-radius: 8px;
+  pointer-events: none;
+}
 
     .goon-footer {
       padding: 8px 10px;
