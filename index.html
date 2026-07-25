@@ -531,7 +531,7 @@
       cursor: pointer;
     }
 
-    /* Hover effect: breaks out completely into a centered viewport overlay zoom with no container constraints */
+    /* Hover effect: Fixed true-center alignment and prevents jitter/flashing */
     .goon-img:hover {
       position: fixed;
       top: 50%;
@@ -539,13 +539,13 @@
       transform: translate(-50%, -50%);
       width: auto;
       height: auto;
-      max-width: 80vw;
-      max-height: 80vh;
+      max-width: 85vw;
+      max-height: 85vh;
       object-fit: contain;
       z-index: 9999;
-      box-shadow: 0 0 50px rgba(0,0,0,0.8);
-      background: rgba(0, 0, 0, 0.9);
-      padding: 10px;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+      background: rgba(0, 0, 0, 0.95);
+      padding: 15px;
       border-radius: 8px;
       pointer-events: none;
     }
