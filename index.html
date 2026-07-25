@@ -489,39 +489,65 @@
       padding: 25px;
     }
 
-/* Goon Corner Grid Layout */
+    /* Goon Corner Grid Layout - Container-less Hover Expansion Feature */
     .goon-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(540px, 1fr));
-      gap: 30px;
-      padding: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      padding: 20px;
     }
+
     .goon-card {
+      position: relative;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      overflow: hidden;
+      overflow: visible;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      transition: border-color 0.2s ease;
     }
 
     .goon-card:hover {
-      transform: translateY(-4px);
       border-color: var(--accent);
+      z-index: 50;
     }
 
-.goon-img-container {
+    .goon-img-container {
       position: relative;
       width: 100%;
-      height: 660px;
+      height: 200px;
       background: var(--bg-color);
+      border-radius: 8px 8px 0 0;
+      overflow: visible;
     }
 
     .goon-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    /* Hover effect: breaks out completely into a centered viewport overlay zoom with no container constraints */
+    .goon-img:hover {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: auto;
+      height: auto;
+      max-width: 80vw;
+      max-height: 80vh;
+      object-fit: contain;
+      z-index: 9999;
+      box-shadow: 0 0 50px rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 10px;
+      border-radius: 8px;
     }
 
     .goon-footer {
@@ -532,6 +558,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      border-radius: 0 0 8px 8px;
     }
 
     .card {
@@ -1013,52 +1040,52 @@
       });
     }
 
-async function renderGoonCorner() {
-  const grid = document.getElementById('goonGrid');
-  const stats = document.getElementById('goonStatsText');
+    async function renderGoonCorner() {
+      const grid = document.getElementById('goonGrid');
+      const stats = document.getElementById('goonStatsText');
 
-  if (!grid) return;
+      if (!grid) return;
 
-  grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading random Goon Corner images...</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Loading random Goon Corner images...</div>`;
 
-  try {
-    const res = await fetch('/api/goon-corner');
-    if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
-    
-    const accumulatedImages = await res.json();
+      try {
+        const res = await fetch('/api/goon-corner');
+        if (!res.ok) throw new Error("Failed to fetch Goon Corner pool");
+        
+        const accumulatedImages = await res.json();
 
-    if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
+        if (stats) stats.innerText = `Showing ${accumulatedImages.length} images`;
 
-    if (accumulatedImages.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
-      return;
-    }
+        if (accumulatedImages.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No images found. Make sure you have artists saved in your database!</div>`;
+          return;
+        }
 
-    // Render placeholders first so the user isn't stuck waiting for all 50 blobs to fetch sequentially
-    grid.innerHTML = accumulatedImages.map((item, index) => `
-      <div class="goon-card" id="goon-card-${index}">
-        <div class="goon-img-container img-zoom-container">
-          <img class="goon-img modal-sample-img" id="goon-img-${index}" src="" alt="${item.artistName}">
-        </div>
-        <div class="goon-footer">🎨 ${item.artistName}</div>
-      </div>
-    `).join('');
+        // Render placeholders first
+        grid.innerHTML = accumulatedImages.map((item, index) => `
+          <div class="goon-card" id="goon-card-${index}">
+            <div class="goon-img-container">
+              <img class="goon-img" id="goon-img-${index}" src="" alt="${item.artistName}">
+            </div>
+            <div class="goon-footer">🎨 ${item.artistName}</div>
+          </div>
+        `).join('');
 
-    // Fetch blob URLs asynchronously for each card so it matches your modal logic
-    accumulatedImages.forEach(async (item, index) => {
-      const rawUrl = item.imageUrl || item.url;
-      const blobUrl = await getBlobImageUrl(rawUrl);
-      const imgElem = document.getElementById(`goon-img-${index}`);
-      if (imgElem) {
-        imgElem.src = blobUrl;
+        // Fetch blob URLs asynchronously for each card
+        accumulatedImages.forEach(async (item, index) => {
+          const rawUrl = item.imageUrl || item.url;
+          const blobUrl = await getBlobImageUrl(rawUrl);
+          const imgElem = document.getElementById(`goon-img-${index}`);
+          if (imgElem) {
+            imgElem.src = blobUrl;
+          }
+        });
+
+      } catch (err) {
+        console.error("Error loading Goon Corner:", err);
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
       }
-    });
-
-  } catch (err) {
-    console.error("Error loading Goon Corner:", err);
-    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--furry-badge); padding: 40px;">Failed to load Goon Corner images from server.</div>`;
-  }
-}
+    }
 
     async function openArtistModal(artist) {
       const backdrop = document.getElementById('detailModalBackdrop');
