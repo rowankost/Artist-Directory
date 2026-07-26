@@ -29,6 +29,7 @@
       color: var(--text-color);
       display: flex;
       min-height: 100vh;
+      flex-direction: column; /* Better structural default for mobile stacking */
     }
 
     /* Sidebar */
@@ -103,12 +104,12 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      min-height: 100vh;
       overflow-y: auto;
     }
 
     .top-bar {
-      padding: 20px;
+      padding: 15px 20px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
@@ -117,10 +118,13 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      gap: 15px;
+      flex-wrap: wrap; /* Prevents squishing on smaller devices */
     }
 
     .search-bar {
-      width: 400px;
+      width: 100%;
+      max-width: 400px;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -151,6 +155,7 @@
       justify-content: center;
       align-items: center;
       z-index: 100;
+      padding: 15px;
     }
 
     .modal-backdrop.open {
@@ -162,10 +167,10 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       width: 650px;
-      max-width: 90%;
+      max-width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      padding: 25px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -195,7 +200,7 @@
 
     .modal-samples {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 15px;
       overflow: visible;
     }
@@ -217,21 +222,24 @@
       cursor: zoom-in;
     }
 
-    .img-zoom-container:hover .modal-sample-img {
-      transform: scale(1.7);
-      object-fit: contain;
-      background: rgba(18, 18, 18, 0.95);
-      position: absolute;
-      top: -20px;
-      left: -20px;
-      right: -20px;
-      bottom: -20px;
-      width: calc(100% + 40px);
-      height: calc(100% + 40px);
-      z-index: 999;
-      border-radius: 8px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
-      pointer-events: none;
+    /* Disable desktop hover-zoom logic on touch/mobile devices to prevent overlapping issues */
+    @media (hover: hover) and (pointer: fine) {
+      .img-zoom-container:hover .modal-sample-img {
+        transform: scale(1.7);
+        object-fit: contain;
+        background: rgba(18, 18, 18, 0.95);
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        right: -20px;
+        bottom: -20px;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        z-index: 999;
+        border-radius: 8px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+      }
     }
 
     .modal-tags-list {
@@ -259,9 +267,10 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 40px;
+      padding: 30px 20px;
       text-align: center;
       max-width: 500px;
+      width: 100%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
@@ -271,7 +280,7 @@
     }
 
     .portal-box h1 {
-      font-size: 2.5rem;
+      font-size: 2rem;
       margin-bottom: 15px;
       color: var(--accent);
     }
@@ -279,29 +288,33 @@
     .portal-box h2 {
       color: #cf6679;
       margin-bottom: 15px;
+      font-size: 1.5rem;
     }
 
     .site-desc {
       color: var(--text-muted);
       line-height: 1.6;
       margin-bottom: 30px;
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
 
     .portal-buttons {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       justify-content: center;
       margin-top: 25px;
+      flex-wrap: wrap;
     }
 
     .gate-btn {
-      padding: 12px 30px;
+      padding: 12px 25px;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
       font-size: 1rem;
       border: none;
+      flex: 1;
+      min-width: 140px;
     }
 
     .gate-btn.accept {
@@ -352,14 +365,16 @@
 
     /* Top Navigation Tabs Bar */
     .top-nav-tabs {
-      height: 75px;
+      min-height: 75px;
       background: var(--card-bg);
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
+      padding: 10px 15px;
       width: 100%;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .nav-logo {
@@ -375,20 +390,19 @@
 
     .nav-tabs-container {
       display: flex;
-      gap: 10px;
-      height: 100%;
+      gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .nav-tab {
       background: var(--bg-color);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 10px 20px;
-      height: 45px;
+      padding: 8px 14px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -399,7 +413,6 @@
     .nav-tab:hover {
       border-color: var(--accent);
       color: var(--text-color);
-      transform: translateY(-2px);
       background: rgba(255, 255, 255, 0.03);
     }
 
@@ -432,7 +445,7 @@
     .nav-actions-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .badge {
@@ -485,17 +498,17 @@
 
     .artist-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 25px;
-      padding: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      padding: 20px;
     }
 
     /* Goon Corner Grid Layout */
     .goon-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(540px, 1fr));
-      gap: 30px;
-      padding: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 20px;
     }
 
     .goon-card {
@@ -503,7 +516,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      overflow: visible;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       transition: border-color 0.2s ease;
@@ -514,42 +527,42 @@
       z-index: 50;
     }
 
-.goon-img-container {
-  position: relative;
-  width: 100%;
-  height: 660px;
-  background: var(--bg-color);
-}
+    .goon-img-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background: var(--bg-color);
+    }
 
-.goon-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: 8px 8px 0 0;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
+    .goon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
 
-/* Hover trigger moved to the container, which never itself moves,
-   so the cursor never "loses" the hover target */
-.goon-img-container:hover .goon-img {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: auto;
-  height: auto;
-  max-width: 85vw;
-  max-height: 85vh;
-  object-fit: contain;
-  z-index: 9999;
-  box-shadow: 0 0 50px rgba(0,0,0,0.9);
-  background: rgba(0, 0, 0, 0.95);
-  padding: 15px;
-  border-radius: 8px;
-  pointer-events: none;
-}
+    @media (hover: hover) and (pointer: fine) {
+      .goon-img-container:hover .goon-img {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: auto;
+        max-width: 85vw;
+        max-height: 85vh;
+        object-fit: contain;
+        z-index: 9999;
+        box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        background: rgba(0, 0, 0, 0.95);
+        padding: 15px;
+        border-radius: 8px;
+        pointer-events: none;
+      }
+    }
 
     .goon-footer {
       padding: 8px 10px;
@@ -568,7 +581,7 @@
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.05) !important;
       border-radius: 12px !important;
-      padding: 18px !important;
+      padding: 16px !important;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
                   border-color 0.3s ease, 
@@ -580,7 +593,7 @@
     }
 
     .card:hover {
-      transform: translateY(-6px) !important;
+      transform: translateY(-4px) !important;
       background: rgba(35, 35, 35, 0.8) !important;
       border-color: var(--accent) !important;
       box-shadow: 0 10px 25px rgba(187, 134, 252, 0.2) !important;
@@ -588,15 +601,11 @@
 
     .card-avatar {
       width: 100%;
-      height: 220px !important;
+      height: 200px !important;
       object-fit: cover;
       border-radius: 8px !important;
       background: var(--bg-color);
       transition: transform 0.4s ease;
-    }
-
-    .card:hover .card-avatar {
-      transform: scale(1.02);
     }
 
     .card h3 {
@@ -632,7 +641,6 @@
       background: rgba(187, 134, 252, 0.15) !important;
       border-color: var(--accent) !important;
       color: var(--accent) !important;
-      transform: scale(1.05);
     }
 
     .favicon {
@@ -661,18 +669,59 @@
       transition: all 0.2s ease;
     }
 
-    .secret-gif-btn:hover {
-      border-color: var(--accent);
-      background: rgba(187, 134, 252, 0.05);
-      transform: scale(1.05);
-    }
-
     .secret-gif-btn img {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       object-fit: contain;
       border-radius: 6px;
       display: block;
+    }
+
+    /* Mobile Responsiveness Overhaul */
+    @media (max-width: 768px) {
+      #workspaceContainer {
+        flex-direction: column !important;
+      }
+      
+      aside {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+        max-height: 220px;
+      }
+
+      .top-nav-tabs {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        height: auto;
+        padding: 12px;
+      }
+
+      .nav-tabs-container {
+        overflow-x: auto;
+        padding-bottom: 5px;
+        width: 100%;
+        flex-wrap: nowrap;
+      }
+
+      .nav-tab {
+        flex-shrink: 0;
+      }
+
+      .nav-actions-group {
+        justify-content: flex-end;
+      }
+
+      .artist-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
+
+      .goon-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
     }
   </style>
 </head>
@@ -1172,7 +1221,7 @@
       const db = await getDb();
 
       let listHtml = db.map(a => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px; border-radius:6px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:10px; border-radius:6px; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
           <span><strong>${a.name}</strong> (${a.genre})</span>
           <div>
             <button class="admin-btn" onclick="editArtistPrompt('${a.name}')">Edit</button>
@@ -1209,13 +1258,13 @@
         </div>
         <div style="display:flex; flex-direction:column; gap:12px;">
           <label style="font-size:0.9rem; color:var(--text-muted);">Artist Name / Danbooru Tag</label>
-          <input type="text" id="adminArtistName" class="search-bar" style="width:100%;" value="${isEdit ? editData.name : ''}" placeholder="e.g. brikot">
+          <input type="text" id="adminArtistName" class="search-bar" style="width:100%; max-width:none;" value="${isEdit ? editData.name : ''}" placeholder="e.g. brikot">
           
           <label style="font-size:0.9rem; color:var(--text-muted);">Twitter Handle (optional)</label>
-          <input type="text" id="adminTwitter" class="search-bar" style="width:100%;" value="${isEdit ? (editData.twitterHandle || '') : ''}" placeholder="e.g. brikot_art">
+          <input type="text" id="adminTwitter" class="search-bar" style="width:100%; max-width:none;" value="${isEdit ? (editData.twitterHandle || '') : ''}" placeholder="e.g. brikot_art">
           
           <label style="font-size:0.9rem; color:var(--text-muted);">Manual Featured Tags (comma-separated, optional)</label>
-          <input type="text" id="adminTags" class="search-bar" style="width:100%;" value="${isEdit ? (editData.featuredTags || []).join(', ') : ''}" placeholder="tits, thighs, creampie">
+          <input type="text" id="adminTags" class="search-bar" style="width:100%; max-width:none;" value="${isEdit ? (editData.featuredTags || []).join(', ') : ''}" placeholder="tits, thighs, creampie">
           
           <button class="admin-btn" style="width:100%; padding:12px; margin-top:10px; background:var(--accent); color:#000; font-weight:bold;" onclick="saveArtistFromAdmin()">Save & Fetch Data</button>
         </div>
